@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Fake_Vinted_Android</string>
+    <string name="drawer_icon">Icona Drawer</string>
+    <string name="title">Fake Vinted</string>
+</resources>
