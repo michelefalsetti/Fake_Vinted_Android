@@ -3,14 +3,8 @@ package it.unical.demacs.fake_vinted_android.model
 import java.time.LocalDate
 
 class User(
-    private val id: Long,
     val username: String,
-    val firstName: String,
-    val lastName: String,
     val email: String,
-    val birthDate: LocalDate,
-    val address: String,
-    val phoneNumber: String,
 
 ) {
 
