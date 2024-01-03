@@ -56,6 +56,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import it.unical.demacs.fake_vinted_android.ui.theme.Fake_Vinted_AndroidTheme
 
 
@@ -64,17 +68,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Fake_Vinted_AndroidTheme {
-                // A surface container using the 'background' color from the theme
+                var isLoggedIn by remember { mutableStateOf(false) }
+                val navController = rememberNavController()
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    if (!isLoggedIn) {
+                        MainPage(onLogin = { isLoggedIn = true })
+                    } else {
+                        AppNavigation(navController)
+                    }
 
-                    //AppNavigation()
-                    MainPage()
-
-
-                }
             }
         }
     }
@@ -83,7 +89,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun MainPage(){
+fun MainPage(onLogin: () -> Unit){
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -119,9 +125,8 @@ fun MainPage(){
         )
 
 
-        Button(onClick = { }, shape= RoundedCornerShape(10.dp)) {
+        Button(onClick = onLogin, shape = RoundedCornerShape(10.dp)) {
             Text(text = "        Accedi        ")
-
         }
     }
 
@@ -132,39 +137,47 @@ fun MainPage(){
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(){
+fun AppNavigation(navController: NavHostController){
     Scaffold(
         bottomBar = {
-            BottomAppBar{
+            BottomAppBar {
                 Row(
                     modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(imageVector = Icons.Default.Home, contentDescription = null)
-                }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                }
-                IconButton(onClick = { /*TODO*/ }) {
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    IconButton(onClick = { navController.navigate(Routes.HOME.route) }) {
+                        Icon(imageVector = Icons.Default.Home, contentDescription = null)
+                    }
+                    IconButton(onClick = { /* TODO: Gestire la navigazione per la ricerca */ }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                    }
+                    IconButton(onClick = { /*TODO*/ }) {
                         Icon(
                             Icons.Default.Email,
                             contentDescription = null,
-                            )
+                        )
                     }
-                IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { /*TODO*/ }) {
                         Icon(Icons.Default.AccountCircle, contentDescription = null)
                     }
+                }
             }
-            }
-
         }
+    ) {
 
-    ){
+        NavHost(navController = navController, startDestination = Routes.HOME.route) {
+            composable(Routes.HOME.route) {
+                // La tua Home composable
+            }
+            composable(Routes.ADDITEM.route) {
+                AddItem(navController) // La composable per aggiungere un articolo
+            }
+            // ... altre composable per altre rotte ...
+        }
     }
     SearchBar()
 }
@@ -195,6 +208,7 @@ fun SearchBar() {
         )
     }
 
-}
+}}
+
 
 
