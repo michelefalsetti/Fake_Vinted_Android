@@ -20,22 +20,6 @@ class UserViewModel(): ViewModel() {
         )
     }
 
-    fun updateFirstName(firstName: String) {
-        val hasError = !UtenteDTO.validateFirstName(firstName = firstName)
-        _userState.value = _userState.value.copy(
-            firstName = firstName,
-            isFirstNameError = hasError
-        )
-    }
-
-    fun updateLastName(lastName : String) {
-        val hasError = !UtenteDTO.validateLastName(lastName = lastName)
-        _userState.value = _userState.value.copy(
-            lastName = lastName,
-            isLastNameError = hasError
-        )
-    }
-
     fun updateEmail(email: String) {
         val hasError = !UtenteDTO.validateEmail(email = email)
         _userState.value = _userState.value.copy(
@@ -45,11 +29,4 @@ class UserViewModel(): ViewModel() {
     }
 
 
-    fun updatePhoneNumber(phoneNumber: String) {
-        val hasError = !UtenteDTO.validatePhoneNumber(phoneNumber)
-        _userState.value = _userState.value.copy(
-            phoneNumber = phoneNumber,
-            isPhoneNumberError = hasError
-        )
-    }
 }
