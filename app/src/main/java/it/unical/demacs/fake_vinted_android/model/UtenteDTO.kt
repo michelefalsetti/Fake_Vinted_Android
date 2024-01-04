@@ -46,12 +46,6 @@ data class UtenteDTO(
                 return true
             return false
         }
-
-        fun validateBirthDate(birthDate: LocalDate): Boolean {
-            if (birthDate.minusYears(LocalDate.now().year.toLong()).year < 13)
-                return true
-            return false
-        }
     }
 }
 

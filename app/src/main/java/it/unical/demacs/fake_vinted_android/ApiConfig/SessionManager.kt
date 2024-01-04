@@ -17,23 +17,6 @@ class SessionManager(context: Context) {
         editor.apply()
     }
 
-    fun saveId(id : Long) {
-        editor.putLong("Id", id)
-        editor.apply()
-    }
-
-    fun getUsername() : String? {
-        val id = sharedPreferences.getString("Username", null)
-
-        return id;
-    }
-
-    fun getId() : Long {
-        val id = sharedPreferences.getLong("Id", 0)
-
-        return id;
-    }
-
 
     fun clearUsername() {
         editor.remove("Username")
@@ -55,7 +38,4 @@ class SessionManager(context: Context) {
         editor.apply()
     }
 
-    fun isLoggedIn(): Boolean {
-        return sharedPreferences.contains("Bearer")
-    }
 }
