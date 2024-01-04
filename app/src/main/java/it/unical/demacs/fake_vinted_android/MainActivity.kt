@@ -1,6 +1,7 @@
 package it.unical.demacs.fake_vinted_android
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -48,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -70,13 +72,23 @@ class MainActivity : ComponentActivity() {
             Fake_Vinted_AndroidTheme {
                 var isLoggedIn by remember { mutableStateOf(false) }
                 val navController = rememberNavController()
+                val context = LocalContext.current
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     if (!isLoggedIn) {
-                        MainPage(onLogin = { isLoggedIn = true })
+                        MainPage(
+                            onLogin = { /*isLoggedIn = true*/
+                                val intent = Intent(context, AuthenticationActivity::class.java)
+                                context.startActivity(intent) },
+                            onRegister = {
+                                // Intenzione per avviare AuthenticationActivity
+                                val intent = Intent(this@MainActivity, AuthenticationActivity::class.java)
+                                startActivity(intent)
+                            }
+                        )
                     } else {
                         AppNavigation(navController)
                     }
@@ -89,7 +101,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun MainPage(onLogin: () -> Unit){
+fun MainPage(onLogin: () -> Unit, onRegister: () -> Unit){
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -112,20 +124,7 @@ fun MainPage(onLogin: () -> Unit){
         )
         Spacer(modifier = Modifier.padding(vertical =10.dp))
 
-        Button(onClick = { /*TODO*/ }, shape= RoundedCornerShape(10.dp)) {
-            Text(text = "        Iscriviti        ")
-
-        }
-        Text(
-            fontFamily = FontFamily.Monospace,
-            text = "oppure",
-            style = MaterialTheme.typography.labelLarge,
-            textAlign = TextAlign.Center,
-            color = Color.Black
-        )
-
-
-        Button(onClick = onLogin, shape = RoundedCornerShape(10.dp)) {
+        Button(onClick = onLogin ) {
             Text(text = "        Accedi        ")
         }
     }
@@ -176,6 +175,7 @@ fun AppNavigation(navController: NavHostController){
             composable(Routes.ADDITEM.route) {
                 AddItem(navController) // La composable per aggiungere un articolo
             }
+
             // ... altre composable per altre rotte ...
         }
     }
