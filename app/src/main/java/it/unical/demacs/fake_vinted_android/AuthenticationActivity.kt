@@ -4,39 +4,66 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
+import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
+import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import it.unical.demacs.fake_vinted_android.ui.theme.Fake_Vinted_AndroidTheme
+import it.unical.demacs.fake_vinted_android.viewmodels.AddressFormViewModel
+import it.unical.demacs.fake_vinted_android.viewmodels.UserFormViewModel
+import kotlinx.coroutines.launch
+
 class AuthenticationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             Fake_Vinted_AndroidTheme {
                 var showLoginPage by remember { mutableStateOf(true) }
+                val context = LocalContext.current
+                val navHostController = rememberNavController()
+                val sessionManager = remember { SessionManager(context) }
+                val apiService = RetrofitClient.create(sessionManager)
+                val userFormViewModel = UserFormViewModel()
+                val isLogged = remember { mutableStateOf(false) }
 
                 if (showLoginPage) {
-                    LoginPage(onSwitchToRegister = { showLoginPage = false })
+                    LoginPage(
+                        onSwitchToRegister = { showLoginPage = false},
+                        navHostController = navHostController,
+                        apiService = apiService,
+                        sessionManager = sessionManager,
+                        isLogged = isLogged
+                    )
                 } else {
-                    RegisterPage(onSwitchToLogin = { showLoginPage = true })
+                   RegisterPage(
+                       onSwitchToLogin = {showLoginPage = true},
+                       userFormViewModel = userFormViewModel,
+                       navHostController = navHostController,
+                       apiService = apiService
+                   )
                 }            }
         }
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterPage(onSwitchToLogin: () -> Unit) {
-    var nickname by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+fun RegisterPage(onSwitchToLogin: () -> Unit, userFormViewModel: UserFormViewModel, navHostController: NavHostController, apiService: ApiService) {
+    val coroutineScope = rememberCoroutineScope()
+    val userState by userFormViewModel.userState.collectAsState()
     var showNicknameError by remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -50,55 +77,80 @@ fun RegisterPage(onSwitchToLogin: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = nickname,
-            onValueChange = {
-                nickname = it
-                showNicknameError = it.length < 4
-            },
+            value = userState.username,
+            onValueChange = {userFormViewModel.updateUsername(it)},
             label = { Text("Nickname") },
-            modifier = Modifier.fillMaxWidth(),
-            isError = showNicknameError
+            singleLine = true,
         )
         if (showNicknameError) {
             Text("Il nickname deve avere almeno 4 caratteri", color = MaterialTheme.colorScheme.error)
         }
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            value = userState.email,
+            onValueChange = { userFormViewModel.updateEmail(it) },
+            label = { Text(stringResource(R.string.user_email)) },
+            singleLine = true,
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
+            value = userState.firstName,
+            onValueChange = { userFormViewModel.updateFirstName(it) },
+            label = { Text(stringResource(R.string.user_firstName)) },
+            singleLine = true,
 
-        Spacer(modifier = Modifier.height(8.dp))
+        )
 
         OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Conferma Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            value = userState.lastName,
+            onValueChange = { userFormViewModel.updateLastName(it) },
+            label = { Text(stringResource(R.string.user_lastName)) },
+            singleLine = true
         )
+
+        OutlinedTextField(
+            value = userState.password,
+            onValueChange = {
+                userFormViewModel.updatePassword(it)
+            },
+            label = { Text(stringResource(R.string.user_password)) },
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+        )
+        OutlinedTextField(
+            value = userState.passwordConfirm,
+            onValueChange = {
+                userFormViewModel.updatePasswordConfirm(
+                    it,
+                    userState.password
+                )
+            },
+            label = { Text(stringResource(R.string.user_password_confirm)) },
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+        )
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* TODO: valida i campi di input
-                           TODO: comunica con il backend per registrare l'utente
-                           TODO: gestisci la risposta del backend
-                           */ if (nickname.length >= 4) {
-                // Procedi con la registrazione
-            }},
+            onClick = {
+                val username = userState.username
+                val password = userState.password
+                val email = userState.email
+                val nome = userState.lastName
+                val cognome = userState.firstName
+
+                coroutineScope.launch {
+                    try {
+                        showDialog.value= true
+                        val response=  apiService.register(username, password, email, nome, cognome)
+                    } catch ( e : Exception){}
+                }
+
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Registrati")
@@ -115,10 +167,11 @@ fun RegisterPage(onSwitchToLogin: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginPage(onSwitchToRegister: () -> Unit) {
-    var nickname by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var loginError by remember { mutableStateOf(false) }
+fun LoginPage(onSwitchToRegister: () -> Unit, navHostController: NavHostController,apiService: ApiService,sessionManager: SessionManager, isLogged : MutableState<Boolean>) {
+    val coroutineScope = rememberCoroutineScope()
+    val nicknameState = remember { mutableStateOf("") }
+    val passwordState = remember { mutableStateOf("") }
+    val loginError by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -131,22 +184,10 @@ fun LoginPage(onSwitchToRegister: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = nickname,
-            onValueChange = { nickname = it },
-            label = { Text("Nickname") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        InputField(name = stringResource(R.string.login_username),modifier = Modifier, nicknameState)
+        InputField(name = stringResource(R.string.login_password), modifier = Modifier, passwordState)
 
-        Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
         if (loginError) {
             Text("Login fallito. Riprova.", color = MaterialTheme.colorScheme.error)
         }
@@ -155,11 +196,25 @@ fun LoginPage(onSwitchToRegister: () -> Unit) {
 
         Button(
             onClick = {
-                // Qui inserisci la logica per autenticare l'utente
-                // Potrebbe coinvolgere la comunicazione con un backend/server
-                // Imposta loginError su true se il login fallisce
-            },
-            modifier = Modifier.fillMaxWidth()
+                val username = nicknameState.value
+                val password = passwordState.value
+
+                coroutineScope.launch {
+                    try {
+                        sessionManager.clearToken()
+                        sessionManager.clearUsername()
+                        val response = apiService.authenticate(username, password)
+                        if(response.isSuccessful){
+                            sessionManager.saveUsername(username)
+                            isLogged.value = true
+                            navHostController.navigate(Routes.HOME.route)
+                        }
+
+                    } catch (e: Exception) {
+                        // Si è verificato un errore durante la chiamata API
+                    }
+            }
+            }
         ) {
             Text("Accedi")
         }

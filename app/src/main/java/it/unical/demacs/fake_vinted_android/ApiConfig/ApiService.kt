@@ -41,9 +41,6 @@ interface ApiService {
         @Field("email") email: String,
         @Field("nome") nome: String,
         @Field("cognome") cognome: String,
-        @Field("datanascita") datanascita: LocalDate,
-        @Field("indirizzo") indirizzo: String,
-        @Field("numerotelefono") numerotelefono: String,
     ): Response<String>
 
     @GET("/api/v3/item/{itemId}")
