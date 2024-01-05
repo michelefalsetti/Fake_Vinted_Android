@@ -1,4 +1,4 @@
-package it.unical.gciaoo.vinteddu_android.viewmodels
+package it.unical.demacs.fake_vinted_android.viewmodels
 
 import it.unical.demacs.fake_vinted_android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,14 +8,22 @@ import java.time.LocalDate
 
 data class UserState(
     val username: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
     val email: String = "",
     val password: String = "",
+    val birthDate: LocalDate = LocalDate.now(),
+    val phoneNumber: String = "",
 
     val passwordConfirm: String = "",
 
     val isUsernameError: Boolean = !User.validateUsername(username = username),
+    val isFirstNameError: Boolean = !User.validateFirstName(firstName = firstName),
+    val isLastNameError: Boolean = !User.validateLastName(lastName = lastName),
     val isEmailError: Boolean = !User.validateEmail(email = email),
     val isPasswordError: Boolean = !User.validatePassword(password = password),
+    val isBirthDateError: Boolean = !User.validateBirthDate(birthDate = birthDate),
+    val isPhoneNumberError: Boolean = !User.validatePhoneNumber(phoneNumber = phoneNumber),
 
     val isPasswordConfirmError: Boolean = passwordConfirm.isEmpty()
 )
@@ -32,6 +40,21 @@ class UserFormViewModel {
         )
     }
 
+    fun updateFirstName(firstName: String) {
+        val hasError = !User.validateFirstName(firstName = firstName)
+        _userState.value = _userState.value.copy(
+            firstName = firstName,
+            isFirstNameError = hasError
+        )
+    }
+
+    fun updateLastName(lastName : String) {
+        val hasError = !User.validateLastName(lastName = lastName)
+        _userState.value = _userState.value.copy(
+            lastName = lastName,
+            isLastNameError = hasError
+        )
+    }
 
     fun updateEmail(email: String) {
         val hasError = !User.validateEmail(email = email)
@@ -57,5 +80,19 @@ class UserFormViewModel {
         )
     }
 
+    fun updateBirthDate(birthDate: LocalDate) {
+        val hasError = !User.validateBirthDate(birthDate)
+        _userState.value = _userState.value.copy(
+            birthDate = birthDate,
+            isBirthDateError = hasError
+        )
+    }
 
+    fun updatePhoneNumber(phoneNumber: String) {
+        val hasError = !User.validatePhoneNumber(phoneNumber)
+        _userState.value = _userState.value.copy(
+            phoneNumber = phoneNumber,
+            isPhoneNumberError = hasError
+        )
+    }
 }
