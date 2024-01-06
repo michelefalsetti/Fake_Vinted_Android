@@ -155,6 +155,27 @@ fun RegisterPage(onSwitchToLogin: () -> Unit, userFormViewModel: UserFormViewMod
         ) {
             Text("Registrati")
         }
+        if (showDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDialog.value = false
+                },
+                title = {
+                    Text(text = "Utente registrato")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            navHostController.navigate(Routes.LOGIN.route)
+                            showDialog.value = false // Chiudi il popup
+                        }
+                    ) {
+                        Text(text = "OK")
+                    }
+                },
+                modifier = Modifier.padding(16.dp)
+            )
+        }
 
         Button(onClick = onSwitchToLogin) {
             Text("Hai già un account? Accedi")

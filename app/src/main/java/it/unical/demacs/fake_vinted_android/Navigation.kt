@@ -13,6 +13,7 @@ enum class Routes(val route: String, val icon: ImageVector, val stringName: Int)
     ADDITEM("addItem", Icons.Default.Add, R.string.add_item),
     LOGIN("login", Icons.Default.Person, R.string.login),
     REGISTER("login/new", Icons.Default.ExitToApp, R.string.register),
+    PROFILE("profile", Icons.Default.Person, R.string.user_page),
 
 
 }

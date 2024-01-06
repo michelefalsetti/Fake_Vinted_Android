@@ -1,6 +1,7 @@
 package it.unical.demacs.fake_vinted_android.viewmodels
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
 
-class UserViewModel(): ViewModel() {
+class UserViewModel(private val context: Context): ViewModel() {
 
     private val _userState = MutableStateFlow(UserState())
     val userState : StateFlow<UserState> = _userState.asStateFlow()
@@ -63,5 +64,19 @@ class UserViewModel(): ViewModel() {
             phoneNumber = phoneNumber,
             isPhoneNumberError = hasError
         )
+    }
+
+    fun updateProfileImage(uri: Uri) {// Converti l'Uri in String
+        val uriString = uri.toString()
+
+        // Salvare l'URI come stringa in SharedPreferences o nel database
+        val sharedPref = context.getSharedPreferences("Profile_Preferences", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("profile_image_uri", uriString)
+            apply()
+        }
+
+        // Aggiorna lo stato locale se necessario
+        //_userState.value = userState.value.copy(profileImageUrl = uriString)
     }
 }
