@@ -49,6 +49,7 @@ import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale.Category
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("RememberReturnType")
@@ -120,7 +121,7 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
             InputField(name = stringResource(R.string.item_description), reducedPaddingModifier, descriptionState)
             InputField(name = stringResource(R.string.item_price), reducedPaddingModifier, priceState)
 
-            val options = listOf("Clothes","Shoes", "Accessories", "Other")
+            val CategoryOptions = listOf("Clothes","Shoes", "Accessories", "Other")
             var expanded by remember { mutableStateOf(false) }
             var selectedOptionText by remember { mutableStateOf("") }
 
@@ -144,7 +145,7 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                 ) {
-                    options.forEach { selectionOption ->
+                    CategoryOptions.forEach { selectionOption ->
                         DropdownMenuItem(
                             text = { Text(selectionOption) },
                             onClick = {
@@ -155,6 +156,45 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     }
                 }
             }
+
+            val ConditionOptions = listOf("New","Used")
+            var expanded1 by remember { mutableStateOf(false) }
+            var selectedOptionText1 by remember { mutableStateOf("") }
+
+            ExposedDropdownMenuBox(
+                expanded = expanded1,
+                onExpandedChange = { expanded1 = !expanded },
+            ) {
+                TextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 5.dp)
+                        .menuAnchor(),
+                    readOnly = true,
+                    value = selectedOptionText1,
+                    onValueChange = {},
+                    label = { Text("Condition") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded1) },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded1,
+                    onDismissRequest = { expanded = false },
+                ) {
+                    ConditionOptions.forEach { selectionOption ->
+                        DropdownMenuItem(
+                            text = { Text(selectionOption) },
+                            onClick = {
+                                selectedOptionText1 = selectionOption
+                                expanded1 = false
+
+                            },
+                        )
+                    }
+                }
+            }
+
+
 
 
 
@@ -181,6 +221,8 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     val nome = nameState.value
                     val descrizione = descriptionState.value
                     val price = priceState.value.toBigDecimal()
+                    val categoria = selectedOptionText
+                    val condizioni = selectedOptionText1
                     coroutineScope.launch {
                         try {
                             showDialog.value = true
@@ -190,7 +232,9 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                                 nome,
                                 descrizione,
                                 price,
-                                imageUri.toString()
+                                imageUri.toString(),
+                                categoria,
+                                condizioni
                             )
                         } catch (e : Exception){
 

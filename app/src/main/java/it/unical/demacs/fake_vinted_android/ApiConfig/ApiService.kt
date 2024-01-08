@@ -64,7 +64,9 @@ interface ApiService {
         @Field("nome") nome: String,
         @Field("descrizione") descrizione: String,
         @Field("prezzo") prezzo: BigDecimal,
-        @Field("immagine") immagine: String?
+        @Field("immagine") immagine: String?,
+        @Field("categoria") categoria : String,
+        @Field("condizioni") condizioni : String
     ): Response<String>
 
     @FormUrlEncoded
