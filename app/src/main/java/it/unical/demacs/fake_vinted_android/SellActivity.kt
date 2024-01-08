@@ -45,22 +45,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
+import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("RememberReturnType")
 @Composable
-fun AddItem(navHostController: NavHostController) {
+fun AddItem(navHostController: NavHostController, apiService: ApiService, sessionManager: SessionManager) {
     val commonModifier = Modifier
         .fillMaxWidth()
         .padding(20.dp)
 
-
-//    val item by remember {
-//        mutableStateOf(Item(null,"","",null,null,"",null,""))
-//    }
-//    val item = remember { mutableStateOf<Item?>(null) }
+    val token = sessionManager.getToken()
 
     val coroutineScope = rememberCoroutineScope()
     val nameState = remember { mutableStateOf("") }
@@ -183,8 +181,22 @@ fun AddItem(navHostController: NavHostController) {
                     val nome = nameState.value
                     val descrizione = descriptionState.value
                     val price = priceState.value.toBigDecimal()
+                    coroutineScope.launch {
+                        try {
+                            showDialog.value = true
+                            val response = apiService.addItem(
+                                "Bearer $token",
+                                token,
+                                nome,
+                                descrizione,
+                                price,
+                                imageUri.toString()
+                            )
+                        } catch (e : Exception){
 
-                    showDialog.value = true
+                        }
+                    }
+
 
 
 

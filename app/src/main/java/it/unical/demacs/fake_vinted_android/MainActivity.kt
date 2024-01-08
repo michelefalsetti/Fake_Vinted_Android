@@ -138,7 +138,7 @@ fun AppNavigation(navController: NavHostController, apiService: ApiService, sess
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        IconButton(onClick = { navController.navigate(Routes.HOME.route) }) {
+                        IconButton(onClick = { navController.navigate(Routes.FIRSTPAGE.route) }) {
                             Icon(imageVector = Icons.Default.Home, contentDescription = null)
                         }
                         IconButton(onClick = { /* TODO: Gestire la navigazione per la ricerca */ }) {
@@ -193,7 +193,7 @@ fun NavigationView(userViewModel: UserViewModel,userFormVIewModel : UserFormView
         }
 
         composable(Routes.ADDITEM.route) {
-            AddItem(navController) // La composable per aggiungere un articolo
+            AddItem(navController,apiService,sessionManager) // La composable per aggiungere un articolo
         }
         composable(Routes.PROFILE.route) {
             ProfilePage(userViewModel = userViewModel)
