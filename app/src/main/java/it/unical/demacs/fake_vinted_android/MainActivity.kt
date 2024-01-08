@@ -64,25 +64,25 @@ class MainActivity : ComponentActivity() {
                 var isLoggedIn by remember { mutableStateOf(false) }
                 val navController = rememberNavController()
                 val context = LocalContext.current
+                val userViewModel = UserViewModel(context)
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                ) {
-                    if (!isLoggedIn) {
-                        MainPage(
-                            onLogin = { /*isLoggedIn = true*/
-                                val intent = Intent(context, AuthenticationActivity::class.java)
-                                context.startActivity(intent) },
-                            onRegister = {
-                                // Intenzione per avviare AuthenticationActivity
-                                val intent = Intent(this@MainActivity, AuthenticationActivity::class.java)
-                                startActivity(intent)
-                            }
-                        )
-                    } else {
-                        AppNavigation(navController)
-                    }
+                ) { if (!isLoggedIn) {
+                    MainPage(
+                        onLogin = { /*isLoggedIn = true*/
+                            val intent = Intent(context, AuthenticationActivity::class.java)
+                            context.startActivity(intent) },
+                        onRegister = {
+                            // Intenzione per avviare AuthenticationActivity
+                            val intent = Intent(this@MainActivity, AuthenticationActivity::class.java)
+                            startActivity(intent)
+                        }
+                    )
+                } else {
+                    AppNavigation(navController,userViewModel)
+                }
 
             }
         }
@@ -127,9 +127,8 @@ fun MainPage(onLogin: () -> Unit, onRegister: () -> Unit){
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(navController: NavHostController){
-    val userViewModel: UserViewModel = viewModel() // Ottieni il ViewModel
-    ProfilePage(userViewModel = userViewModel)
+fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel){
+
 
     Scaffold(
         bottomBar = {
@@ -207,6 +206,7 @@ fun SearchBar() {
             placeholder = { Text(text = "Cerca i prodotti!") }
         )
     }
+
 
 }}
 
