@@ -157,7 +157,7 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                 }
             }
 
-            val ConditionOptions = listOf("New","Used")
+            val ConditionOptions = listOf("New with tag","New without tag","Very good","Good","Satisfactory")
             var expanded1 by remember { mutableStateOf(false) }
             var selectedOptionText1 by remember { mutableStateOf("") }
 
@@ -267,7 +267,7 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     modifier = Modifier.padding(16.dp)
                 )
             }
-            //Spacer(modifier = Modifier.weight(1f))
+
             Text(
                 text = "Back Home",
                 modifier = Modifier
