@@ -25,41 +25,9 @@ import it.unical.demacs.fake_vinted_android.viewmodels.AddressFormViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserFormViewModel
 import kotlinx.coroutines.launch
 
-class AuthenticationActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            Fake_Vinted_AndroidTheme {
-                var showLoginPage by remember { mutableStateOf(true) }
-                val context = LocalContext.current
-                val navHostController = rememberNavController()
-                val sessionManager = remember { SessionManager(context) }
-                val apiService = RetrofitClient.create(sessionManager)
-                val userFormViewModel = UserFormViewModel()
-                val isLogged = remember { mutableStateOf(false) }
-
-                if (showLoginPage) {
-                    LoginPage(
-                        onSwitchToRegister = { showLoginPage = false},
-                        navHostController = navHostController,
-                        apiService = apiService,
-                        sessionManager = sessionManager,
-                        isLogged = isLogged
-                    )
-                } else {
-                   RegisterPage(
-                       onSwitchToLogin = {showLoginPage = true},
-                       userFormViewModel = userFormViewModel,
-                       navHostController = navHostController,
-                       apiService = apiService
-                   )
-                }            }
-        }
-    }
-}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterPage(onSwitchToLogin: () -> Unit, userFormViewModel: UserFormViewModel, navHostController: NavHostController, apiService: ApiService) {
+fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHostController, apiService: ApiService) {
     val coroutineScope = rememberCoroutineScope()
     val userState by userFormViewModel.userState.collectAsState()
     var showNicknameError by remember { mutableStateOf(false) }
@@ -177,7 +145,7 @@ fun RegisterPage(onSwitchToLogin: () -> Unit, userFormViewModel: UserFormViewMod
             )
         }
 
-        Button(onClick = onSwitchToLogin) {
+        Button(onClick = { navHostController.navigate(Routes.LOGIN.route) }) {
             Text("Hai già un account? Accedi")
         }
 
@@ -186,9 +154,8 @@ fun RegisterPage(onSwitchToLogin: () -> Unit, userFormViewModel: UserFormViewMod
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginPage(onSwitchToRegister: () -> Unit, navHostController: NavHostController,apiService: ApiService,sessionManager: SessionManager, isLogged : MutableState<Boolean>) {
+fun LoginPage( navHostController: NavHostController,apiService: ApiService,sessionManager: SessionManager, isLogged : MutableState<Boolean>) {
     val coroutineScope = rememberCoroutineScope()
     val nicknameState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
@@ -228,7 +195,7 @@ fun LoginPage(onSwitchToRegister: () -> Unit, navHostController: NavHostControll
                         if(response.isSuccessful){
                             sessionManager.saveUsername(username)
                             isLogged.value = true
-                            navHostController.navigate(Routes.HOME.route)
+                            navHostController.navigate(Routes.FIRSTPAGE.route)
                         }
 
                     } catch (e: Exception) {
@@ -239,9 +206,9 @@ fun LoginPage(onSwitchToRegister: () -> Unit, navHostController: NavHostControll
         ) {
             Text("Accedi")
         }
-
-        Button(onClick = onSwitchToRegister) {
+        Button(onClick = { navHostController.navigate(Routes.REGISTER.route) }) {
             Text("Non hai un account? Registrati")
         }
+
     }
 }

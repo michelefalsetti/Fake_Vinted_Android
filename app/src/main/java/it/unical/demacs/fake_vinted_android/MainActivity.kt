@@ -32,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,8 +52,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
+import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
+import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import it.unical.demacs.fake_vinted_android.model.Utente
 import it.unical.demacs.fake_vinted_android.ui.theme.Fake_Vinted_AndroidTheme
+import it.unical.demacs.fake_vinted_android.viewmodels.UserFormViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserViewModel
 
 
@@ -61,27 +66,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Fake_Vinted_AndroidTheme {
-                var isLoggedIn by remember { mutableStateOf(false) }
+                val isLogged = remember { mutableStateOf(false) }
                 val navController = rememberNavController()
                 val context = LocalContext.current
+                val sessionManager = remember { SessionManager(context) }
+                val apiService = RetrofitClient.create(sessionManager)
                 val userViewModel = UserViewModel(context)
+                val userFormViewModel = UserFormViewModel()
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                ) { if (!isLoggedIn) {
-                    MainPage(
-                        onLogin = { /*isLoggedIn = true*/
-                            val intent = Intent(context, AuthenticationActivity::class.java)
-                            context.startActivity(intent) },
-                        onRegister = {
-                            // Intenzione per avviare AuthenticationActivity
-                            val intent = Intent(this@MainActivity, AuthenticationActivity::class.java)
-                            startActivity(intent)
-                        }
+                ) {
+                    NavigationView(
+                        userViewModel = userViewModel,
+                        userFormVIewModel =userFormViewModel ,
+                        apiService = apiService,
+                        sessionManager = sessionManager,
+                        navController = navController,
+                        isLogged = isLogged
                     )
-                } else {
-                    AppNavigation(navController,userViewModel)
                 }
 
             }
@@ -90,95 +94,115 @@ class MainActivity : ComponentActivity() {
 }
 
 
-
 @Composable
-fun MainPage(onLogin: () -> Unit, onRegister: () -> Unit){
-    Column (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(horizontal = 30.dp)
-            .fillMaxHeight()
-    ){
-        Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "logo",
-            modifier = Modifier.size(300.dp)
-        )
+fun MainPage( navController: NavHostController) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(horizontal = 30.dp)
+                .fillMaxHeight()
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "logo",
+                modifier = Modifier.size(300.dp)
+            )
 
-        Spacer(modifier = Modifier.padding(vertical =90.dp))
-        Text(
-            fontFamily = FontFamily.Monospace,
-            text = "Per continuare ad usare l'app è necessario eseguire l'accesso.",
-            style = MaterialTheme.typography.labelLarge,
-            textAlign = TextAlign.Center,
-            color = Color.Black
-        )
-        Spacer(modifier = Modifier.padding(vertical =10.dp))
+            Spacer(modifier = Modifier.padding(vertical = 90.dp))
+            Text(
+                fontFamily = FontFamily.Monospace,
+                text = "Per continuare ad usare l'app è necessario eseguire l'accesso.",
+                style = MaterialTheme.typography.labelLarge,
+                textAlign = TextAlign.Center,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.padding(vertical = 10.dp))
 
-        Button(onClick = onLogin ) {
-            Text(text = "        Accedi        ")
+            Button(onClick = { navController.navigate((Routes.LOGIN.route)) }) {
+                Text(text = "        Accedi        ")
+
+            }
         }
+
     }
-
-}
-
-
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel){
-
-
-    Scaffold(
-        bottomBar = {
-            BottomAppBar {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    IconButton(onClick = { navController.navigate(Routes.HOME.route) }) {
-                        Icon(imageVector = Icons.Default.Home, contentDescription = null)
-                    }
-                    IconButton(onClick = { /* TODO: Gestire la navigazione per la ricerca */ }) {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                    }
-                    IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                    }
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            Icons.Default.Email,
-                            contentDescription = null,
-                        )
-                    }
-                    IconButton(onClick = { navController.navigate(Routes.PROFILE.route) }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = null)
+fun AppNavigation(navController: NavHostController, apiService: ApiService, sessionManager: SessionManager, isLogged: MutableState<Boolean>) {
+        Scaffold(
+            bottomBar = {
+                BottomAppBar {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        IconButton(onClick = { navController.navigate(Routes.HOME.route) }) {
+                            Icon(imageVector = Icons.Default.Home, contentDescription = null)
+                        }
+                        IconButton(onClick = { /* TODO: Gestire la navigazione per la ricerca */ }) {
+                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                        }
+                        IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                        }
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(
+                                Icons.Default.Email,
+                                contentDescription = null,
+                            )
+                        }
+                        IconButton(onClick = { navController.navigate(Routes.PROFILE.route) }) {
+                            Icon(Icons.Default.AccountCircle, contentDescription = null)
+                        }
                     }
                 }
             }
+        ) {
         }
-    ) {
-
-        NavHost(navController = navController, startDestination = Routes.HOME.route) {
-            composable(Routes.HOME.route) {
-                // La tua Home composable
-            }
-            composable(Routes.ADDITEM.route) {
-                AddItem(navController) // La composable per aggiungere un articolo
-            }
-            composable(Routes.PROFILE.route)  {
-                ProfilePage(userViewModel = userViewModel)
-
-
-            }
-
-
-            // ... altre composable per altre rotte ...
-        }
+        SearchBar()
     }
-    SearchBar()
+
+@Composable
+fun NavigationView(userViewModel: UserViewModel,userFormVIewModel : UserFormViewModel, apiService: ApiService, sessionManager: SessionManager, navController: NavHostController, isLogged: MutableState<Boolean>) {
+    NavHost(navController = navController, startDestination = Routes.HOME.route) {
+        composable(Routes.HOME.route) {
+            MainPage( navController = navController)
+        }
+
+        composable(Routes.LOGIN.route) {
+            LoginPage(
+                navHostController = navController,
+                apiService = apiService ,
+                sessionManager = sessionManager,
+                isLogged = isLogged
+            )
+        }
+
+        composable(Routes.REGISTER.route){
+            RegisterPage(
+                userFormViewModel = userFormVIewModel,
+                navHostController = navController,
+                apiService = apiService
+            )
+        }
+
+        composable(Routes.FIRSTPAGE.route){
+           AppNavigation(navController = navController, apiService = apiService, sessionManager = sessionManager, isLogged = isLogged )
+        }
+
+        composable(Routes.ADDITEM.route) {
+            AddItem(navController) // La composable per aggiungere un articolo
+        }
+        composable(Routes.PROFILE.route) {
+            ProfilePage(userViewModel = userViewModel)
+        }
+
+
+        // ... altre composable per altre rotte ...
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -208,7 +232,7 @@ fun SearchBar() {
     }
 
 
-}}
+}
 
 
 

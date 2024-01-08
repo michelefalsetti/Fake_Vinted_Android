@@ -201,7 +201,7 @@ fun AddItem(navHostController: NavHostController) {
                     confirmButton = {
                         Button(
                             onClick = {
-                                navHostController.navigate(Routes.HOME.route)
+                                navHostController.navigate(Routes.FIRSTPAGE.route)
                                 showDialog.value = false // Chiudi il popup
                             }
                         ) {
@@ -216,7 +216,7 @@ fun AddItem(navHostController: NavHostController) {
                 text = "Back Home",
                 modifier = Modifier
                     .padding(vertical = 15.dp)
-                    .clickable(onClick = { navHostController.navigate(Routes.HOME.route) })
+                    .clickable(onClick = { navHostController.navigate(Routes.FIRSTPAGE.route) })
             )
         }
     }
