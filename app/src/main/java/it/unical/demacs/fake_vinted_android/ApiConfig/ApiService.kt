@@ -1,5 +1,4 @@
 package it.unical.demacs.fake_vinted_android.ApiConfig
-import android.net.Uri
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
@@ -11,7 +10,6 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import java.math.BigDecimal
-import java.time.LocalDate
 
 interface ApiService {
 
@@ -53,7 +51,7 @@ interface ApiService {
     suspend fun getFavorites(@Header("Authorization") token:String?, @Path("token") token_: String): Response<List<Item>>
 
     @GET("/api/v2/inVendita/{token}")
-    suspend fun getItemInVendita(@Header("Authorization") token:String?, @Path("token")token_: String): Response<List<Item>>
+    suspend fun getItemInVendita(@Header("Authorization") token: String?, @Path("token") token_: String): Response<List<Item>>
 
 
     @FormUrlEncoded

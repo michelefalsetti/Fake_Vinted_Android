@@ -55,8 +55,10 @@ import androidx.navigation.compose.rememberNavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
+import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.Utente
 import it.unical.demacs.fake_vinted_android.ui.theme.Fake_Vinted_AndroidTheme
+import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserFormViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserViewModel
 
@@ -73,6 +75,7 @@ class MainActivity : ComponentActivity() {
                 val apiService = RetrofitClient.create(sessionManager)
                 val userViewModel = UserViewModel(context)
                 val userFormViewModel = UserFormViewModel()
+                val itemViewModel = ItemViewModel(context)
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -84,7 +87,9 @@ class MainActivity : ComponentActivity() {
                         apiService = apiService,
                         sessionManager = sessionManager,
                         navController = navController,
-                        isLogged = isLogged
+                        isLogged = isLogged,
+                        itemViewModel = itemViewModel
+
                     )
                 }
 
@@ -126,46 +131,9 @@ fun MainPage( navController: NavHostController) {
 
     }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppNavigation(navController: NavHostController, apiService: ApiService, sessionManager: SessionManager, isLogged: MutableState<Boolean>) {
-        Scaffold(
-            bottomBar = {
-                BottomAppBar {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        IconButton(onClick = { navController.navigate(Routes.FIRSTPAGE.route) }) {
-                            Icon(imageVector = Icons.Default.Home, contentDescription = null)
-                        }
-                        IconButton(onClick = { /* TODO: Gestire la navigazione per la ricerca */ }) {
-                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                        }
-                        IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
-                            Icon(Icons.Default.Add, contentDescription = null)
-                        }
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(
-                                Icons.Default.Email,
-                                contentDescription = null,
-                            )
-                        }
-                        IconButton(onClick = { navController.navigate(Routes.PROFILE.route) }) {
-                            Icon(Icons.Default.AccountCircle, contentDescription = null)
-                        }
-                    }
-                }
-            }
-        ) {
-        }
-        SearchBar()
-    }
 
 @Composable
-fun NavigationView(userViewModel: UserViewModel,userFormVIewModel : UserFormViewModel, apiService: ApiService, sessionManager: SessionManager, navController: NavHostController, isLogged: MutableState<Boolean>) {
+fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,userFormVIewModel : UserFormViewModel, apiService: ApiService, sessionManager: SessionManager, navController: NavHostController, isLogged: MutableState<Boolean>) {
     NavHost(navController = navController, startDestination = Routes.HOME.route) {
         composable(Routes.HOME.route) {
             MainPage( navController = navController)
@@ -173,7 +141,7 @@ fun NavigationView(userViewModel: UserViewModel,userFormVIewModel : UserFormView
 
         composable(Routes.LOGIN.route) {
             LoginPage(
-                navHostController = navController,
+                navController = navController,
                 apiService = apiService ,
                 sessionManager = sessionManager,
                 isLogged = isLogged
@@ -188,9 +156,7 @@ fun NavigationView(userViewModel: UserViewModel,userFormVIewModel : UserFormView
             )
         }
 
-        composable(Routes.FIRSTPAGE.route){
-           AppNavigation(navController = navController, apiService = apiService, sessionManager = sessionManager, isLogged = isLogged )
-        }
+
 
         composable(Routes.ADDITEM.route) {
             AddItem(navController,apiService,sessionManager) // La composable per aggiungere un articolo
@@ -198,6 +164,13 @@ fun NavigationView(userViewModel: UserViewModel,userFormVIewModel : UserFormView
         composable(Routes.PROFILE.route) {
             ProfilePage(userViewModel = userViewModel)
         }
+        composable(Routes.FIRSTPAGE.route) {
+            HomePage(itemViewModel = itemViewModel, navController)
+        }
+        composable(Routes.ITEM.route) {
+            ItemPage(itemViewModel = itemViewModel)
+        }
+
 
 
         // ... altre composable per altre rotte ...

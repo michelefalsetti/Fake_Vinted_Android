@@ -1,16 +1,23 @@
 package it.unical.demacs.fake_vinted_android.viewmodels
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import it.unical.demacs.fake_vinted_android.model.Item
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class ItemViewModel(private val localContext: Context) : ViewModel() {
 
     private val apiService: ApiService
     private val sessionManager: SessionManager
+
+    private val _itemsInVendita = MutableStateFlow<List<Item>>(emptyList())
+    val itemsInVendita: StateFlow<List<Item>> = _itemsInVendita.asStateFlow()
 
     init {
         sessionManager = SessionManager(localContext) // Create an instance of your SessionManager class
@@ -27,4 +34,15 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
             null
         }
     }
+
+    @SuppressLint("SuspiciousIndentation")
+    suspend fun fetchItemsInVendita() {
+        val token = sessionManager.getToken()
+        val response = apiService.getItemInVendita("Bearer $token", token!!)
+            if (response.isSuccessful) {
+                _itemsInVendita.value = response.body() ?: emptyList()
+            }
+    }
+
+
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
@@ -155,7 +156,7 @@ fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHo
 }
 
 @Composable
-fun LoginPage( navHostController: NavHostController,apiService: ApiService,sessionManager: SessionManager, isLogged : MutableState<Boolean>) {
+fun LoginPage(navController: NavController, apiService: ApiService, sessionManager: SessionManager, isLogged : MutableState<Boolean>) {
     val coroutineScope = rememberCoroutineScope()
     val nicknameState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
@@ -195,7 +196,7 @@ fun LoginPage( navHostController: NavHostController,apiService: ApiService,sessi
                         if(response.isSuccessful){
                             sessionManager.saveUsername(username)
                             isLogged.value = true
-                            navHostController.navigate(Routes.FIRSTPAGE.route)
+                            navController.navigate(Routes.FIRSTPAGE.route)
                         }
 
                     } catch (e: Exception) {
@@ -206,7 +207,7 @@ fun LoginPage( navHostController: NavHostController,apiService: ApiService,sessi
         ) {
             Text("Accedi")
         }
-        Button(onClick = { navHostController.navigate(Routes.REGISTER.route) }) {
+        Button(onClick = { navController.navigate(Routes.REGISTER.route) }) {
             Text("Non hai un account? Registrati")
         }
 
