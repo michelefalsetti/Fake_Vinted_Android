@@ -32,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -134,6 +135,9 @@ fun MainPage( navController: NavHostController) {
 
 @Composable
 fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,userFormVIewModel : UserFormViewModel, apiService: ApiService, sessionManager: SessionManager, navController: NavHostController, isLogged: MutableState<Boolean>) {
+    LaunchedEffect(key1 = true) {
+        itemViewModel.fetchItemsInVendita()
+    }
     NavHost(navController = navController, startDestination = Routes.HOME.route) {
         composable(Routes.HOME.route) {
             MainPage( navController = navController)
