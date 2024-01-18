@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package it.unical.demacs.fake_vinted_android
 
 import android.annotation.SuppressLint
@@ -193,11 +195,6 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     }
                 }
             }
-
-
-
-
-
 
 
             Button(

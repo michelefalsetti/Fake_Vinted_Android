@@ -65,6 +65,10 @@ class UserViewModel(private val context: Context): ViewModel() {
             isPhoneNumberError = hasError
         )
     }
+    fun onImageSelected(newImageUri: Uri?) {
+        if (newImageUri != null) {
+            // Aggiorna l'immagine del profilo
+            updateProfileImage(newImageUri)}}
 
     fun updateProfileImage(uri: Uri) {// Converti l'Uri in String
         val uriString = uri.toString()
@@ -77,6 +81,14 @@ class UserViewModel(private val context: Context): ViewModel() {
         }
 
         // Aggiorna lo stato locale se necessario
-        //_userState.value = userState.value.copy(profileImageUrl = uriString)
+        _userState.value = userState.value.copy(profileImageUrl = uriString)
+    }
+    fun updateUserDetails(username: String, firstName: String, lastName: String) {
+        // Aggiorna lo stato locale
+        val updatedUserState = UserState(username, firstName, lastName)
+        _userState.value = updatedUserState
+
+
+
     }
 }
