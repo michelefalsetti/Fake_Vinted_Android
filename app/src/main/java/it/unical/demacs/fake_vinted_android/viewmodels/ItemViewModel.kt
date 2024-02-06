@@ -45,4 +45,9 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
     }
 
 
+    fun getItemById(itemId: String): Item? {
+        val itemIdLong = itemId.toLongOrNull() // Converte la stringa in Long?, restituisce null se la conversione fallisce
+        return itemsInVendita.value.find { it.id == itemIdLong }
+    }
+
 }

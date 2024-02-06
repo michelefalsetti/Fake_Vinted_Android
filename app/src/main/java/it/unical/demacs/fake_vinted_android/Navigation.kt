@@ -18,7 +18,7 @@ enum class Routes(val route: String, val icon: ImageVector, val stringName: Int)
     LOGIN("login", Icons.Default.Person, R.string.login),
     REGISTER("login/new", Icons.Default.ExitToApp, R.string.register),
     PROFILE("profile", Icons.Default.Person, R.string.user_page),
-    ITEM("Item", Icons.Default.Info, R.string.item_description),
+    ITEM("item/{itemId}", Icons.Default.Info, R.string.item_description),
 
 
 }

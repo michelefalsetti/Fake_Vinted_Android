@@ -98,7 +98,7 @@ fun ItemPreview(item: Item, navController: NavController) {
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .clickable { navController.navigate(Routes.ITEM.route)},
+            .clickable { navController.navigate("${Routes.ITEM.route}/${item.id.toString()}") },
         elevation = CardDefaults.cardElevation()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -121,12 +121,26 @@ fun ItemPreview(item: Item, navController: NavController) {
 }
 
 @Composable
-fun ItemPage(itemViewModel: ItemViewModel) {
-    val items by itemViewModel.itemsInVendita.collectAsState()
-    val scrollState = rememberScrollState()
+fun ItemPage(itemViewModel: ItemViewModel, itemId: String) {
+    // Converti l'ID da String a Long
+    val itemIdLong = itemId.toLongOrNull()
 
+    // Stato per gestire l'item selezionato
+    val selectedItem = itemViewModel.getItemById(itemId)
+
+    // UI per visualizzare i dettagli dell'item
+    selectedItem?.let { item ->
+        ItemDetailContent(item)
+    } ?: run {
+        Text("Item non trovato.")
+    }
+
+
+}
+@Composable
+fun ItemDetailContent(item: Item) {
+    val scrollState = rememberScrollState()
     Column(modifier = Modifier.verticalScroll(scrollState)) {
-        items.forEach { item ->
             item.immagini?.let { imageUrl ->
                 Image(
                     painter = rememberAsyncImagePainter(model = imageUrl),
@@ -179,6 +193,5 @@ fun ItemPage(itemViewModel: ItemViewModel) {
                 Text("Acquista")
             }
         }
-    }
 }
 
