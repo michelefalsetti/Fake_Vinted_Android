@@ -38,11 +38,27 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
     @SuppressLint("SuspiciousIndentation")
     suspend fun fetchItemsInVendita() {
         val token = sessionManager.getToken()
-        val response = apiService.getItemInVendita("Bearer $token", token!!)
-            if (response.isSuccessful) {
-                _itemsInVendita.value = response.body() ?: emptyList()
+
+        if (token != null) {
+            try {
+                val response = apiService.getItemInVendita("Bearer $token", token)
+
+                if (response.isSuccessful) {
+                    _itemsInVendita.value = response.body() ?: emptyList()
+                } else {
+                    // Gestisci il caso in cui la richiesta non è stata eseguita correttamente
+                    // Ad esempio, logga un messaggio di errore o gestisci l'errore di conseguenza
+                }
+            } catch (e: Exception) {
+                // Gestisci eventuali eccezioni durante la richiesta
+                // Ad esempio, logga un messaggio di errore o gestisci l'errore di conseguenza
             }
+        } else {
+            // Gestisci il caso in cui il token è nullo
+            // Ad esempio, logga un messaggio di errore o gestisci l'errore di conseguenza
+        }
     }
+
 
 
     fun getItemById(itemId: String): Item? {
