@@ -121,11 +121,13 @@ fun ItemPreview(item: Item, navController: NavController) {
                     bitmap = imageBitmap.asImageBitmap(),
                     contentDescription = "Immagine Prodotto",
                     modifier = Modifier
-                        .height(150.dp)
+                        .height(300.dp)
                         .fillMaxWidth()
+                        .wrapContentWidth(Alignment.CenterHorizontally)
                         .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop
                 )
+
             }
             Text(item.nome, style = MaterialTheme.typography.titleMedium)
             Text("Prezzo: ${item.prezzo}€", style = MaterialTheme.typography.bodyMedium)
@@ -147,15 +149,12 @@ fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel()) {
         itemViewModel.loadSingleItem(itemId)
     }
 
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-        if (isLoading) {
-            CircularProgressIndicator()
-        } else if (error != null) {
-            Text(text = error)
-        } else item?.let {
-            ItemContent(item = it)
-        }
-    }
+
+    if (isLoading) {
+        CircularProgressIndicator()
+    } else if (error != null) {
+        Text(text = error)
+    } else item?.let { ItemContent(item = it) }
 }
 
 @Composable
@@ -164,14 +163,21 @@ fun ItemContent(item: Item) {
 
     Column(modifier = Modifier.verticalScroll(scrollState)) {
         item.immagini?.let { imageUrl ->
+            val imageBitmap = remember {
+                val decodedBytes = Base64.decode(imageUrl.substringAfter(','), Base64.DEFAULT)
+                BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+            }
             Image(
-                painter = rememberAsyncImagePainter(model = imageUrl),
+                bitmap = imageBitmap.asImageBitmap(),
                 contentDescription = "Immagine Prodotto",
                 modifier = Modifier
+                    .height(300.dp)
                     .fillMaxWidth()
-                    .height(300.dp),
-                contentScale = ContentScale.FillWidth
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
             )
+
         }
 
         Text(
