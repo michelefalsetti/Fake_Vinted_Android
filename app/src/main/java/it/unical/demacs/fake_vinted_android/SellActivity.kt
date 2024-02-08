@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package it.unical.demacs.fake_vinted_android
 
 import android.annotation.SuppressLint
@@ -50,6 +52,13 @@ import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale.Category
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberAsyncImagePainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("RememberReturnType")
@@ -68,7 +77,8 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
     val showDialog = remember { mutableStateOf(false) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
-    val bitmap = remember { mutableStateOf<Bitmap?>(null) }
+    val base64Image = remember { mutableStateOf<String?>(null) }
+
 
     val reducedPaddingModifier = Modifier
         .fillMaxWidth()
@@ -82,6 +92,12 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri?->
         imageUri = uri
         // Ottieni il percorso dell'immagine dalla URI
+        val imageInputStream = context.contentResolver.openInputStream(uri!!)
+        val imageByteArray = imageInputStream?.readBytes()
+
+        if (imageByteArray != null) {
+            base64Image.value = Base64.encodeToString(imageByteArray, Base64.DEFAULT)
+        }
     }
 
 
@@ -93,28 +109,22 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
         item {
             Spacer(modifier = Modifier.height(90.dp))
 
-            imageUri?.let {
-                if (Build.VERSION.SDK_INT < 28) {
-                    bitmap.value = MediaStore.Images
-                        .Media.getBitmap(context.contentResolver, it)
-                } else {
-                    val source = ImageDecoder.createSource(context.contentResolver, it)
-                    bitmap.value = ImageDecoder.decodeBitmap(source)
+            base64Image.value?.let { base64String ->
+                val imageBitmap = remember {
+                    val decodedBytes = Base64.decode(base64String.substringAfter(','), Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 }
-
-                bitmap.value?.let { btm ->
-                    Image(
-
-                        bitmap = btm.asImageBitmap(),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(400.dp)
-                            .padding(20.dp)
-
-
-                    )
-                }
+                Image(
+                    bitmap = imageBitmap.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(400.dp)
+                        .padding(20.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
             }
+
 
             //Spacer(modifier = Modifier.weight(0.2f))
             InputField(name = stringResource(R.string.item_title), reducedPaddingModifier, nameState)
@@ -195,11 +205,6 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
             }
 
 
-
-
-
-
-
             Button(
                 modifier = commonModifier
                     .padding(vertical = 30.dp)
@@ -232,7 +237,7 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                                 nome,
                                 descrizione,
                                 price,
-                                imageUri.toString(),
+                                base64Image.value?:"",
                                 categoria,
                                 condizioni
                             )

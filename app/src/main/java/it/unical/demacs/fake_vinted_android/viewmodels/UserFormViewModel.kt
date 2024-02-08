@@ -14,7 +14,7 @@ data class UserState(
     val password: String = "",
     val birthDate: LocalDate = LocalDate.now(),
     val phoneNumber: String = "",
-
+    val profileImageUrl: String = "",
     val passwordConfirm: String = "",
 
     val isUsernameError: Boolean = !User.validateUsername(username = username),

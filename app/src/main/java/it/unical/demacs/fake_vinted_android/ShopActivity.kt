@@ -40,7 +40,10 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
-
+import androidx.compose.ui.graphics.asImageBitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.compose.runtime.remember
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -63,7 +66,7 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
                     IconButton(onClick = { navController.navigate(Routes.FIRSTPAGE.route) }) {
                         Icon(imageVector = Icons.Default.Home, contentDescription = null)
                     }
-                    IconButton(onClick = { /* TODO: Gestire la navigazione per la ricerca */ }) {
+                    IconButton(onClick = { navController.navigate(Routes.SEARCH.route) }) {
                         Icon(imageVector = Icons.Default.Search, contentDescription = null)
                     }
                     IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
@@ -94,6 +97,7 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
         }
     }
 }
+
 @Composable
 fun ItemPreview(item: Item, navController: NavController) {
     Card(
@@ -108,8 +112,12 @@ fun ItemPreview(item: Item, navController: NavController) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             item.immagini?.let { imageUrl ->
+                val imageBitmap = remember {
+                    val decodedBytes = Base64.decode(imageUrl.substringAfter(','), Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                }
                 Image(
-                    painter = rememberAsyncImagePainter(model = item.immagini),
+                    bitmap = imageBitmap.asImageBitmap(),
                     contentDescription = "Immagine Prodotto",
                     modifier = Modifier
                         .height(150.dp)
@@ -202,8 +210,6 @@ fun ItemContent(item: Item) {
         ) {
             Text("Acquista")
         }
-
-        // Continua ad aggiungere gli altri dettagli dell'item come prima
     }
 }
 

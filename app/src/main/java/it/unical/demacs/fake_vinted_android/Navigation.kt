@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Routes(val route: String, val icon: ImageVector, val stringName: Int) {
@@ -19,6 +20,7 @@ enum class Routes(val route: String, val icon: ImageVector, val stringName: Int)
     REGISTER("login/new", Icons.Default.ExitToApp, R.string.register),
     PROFILE("profile", Icons.Default.Person, R.string.user_page),
     ITEM("item/{itemId}", Icons.Default.Info, R.string.item_description),
+    SEARCH("search",Icons.Default.Search,R.string.search)
 
 
 }
