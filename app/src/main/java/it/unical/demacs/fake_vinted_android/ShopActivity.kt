@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -146,12 +147,15 @@ fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel()) {
         itemViewModel.loadSingleItem(itemId)
     }
 
-
-    if (isLoading) {
-        CircularProgressIndicator()
-    } else if (error != null) {
-        Text(text = error)
-    } else item?.let { ItemContent(item = it) }
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else if (error != null) {
+            Text(text = error)
+        } else item?.let {
+            ItemContent(item = it)
+        }
+    }
 }
 
 @Composable

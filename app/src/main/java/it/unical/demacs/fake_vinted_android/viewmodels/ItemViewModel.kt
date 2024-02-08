@@ -68,7 +68,7 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
                 _currentItem.value = response.body()
                 return response.body()
             } else {
-                _error.value = "Errore durante il caricamento dell'item ARCAMADO"
+                _error.value = "Errore durante il caricamento dell'item "
                 return null
             }
         } catch (e: Exception) {
