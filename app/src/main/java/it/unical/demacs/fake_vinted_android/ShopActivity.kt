@@ -16,9 +16,9 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -98,7 +99,10 @@ fun ItemPreview(item: Item, navController: NavController) {
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .clickable { navController.navigate(Routes.ITEM.route)},
+            .clickable {
+                val itemId = item.id
+                navController.navigate(Routes.ITEM.route.replace("{itemId}", itemId.toString()))
+            },
         elevation = CardDefaults.cardElevation()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -120,65 +124,62 @@ fun ItemPreview(item: Item, navController: NavController) {
     }
 }
 
+
 @Composable
-fun ItemPage(itemViewModel: ItemViewModel) {
-    val items by itemViewModel.itemsInVendita.collectAsState()
+fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel()) {
+
+
+    val item by itemViewModel.currentItem.collectAsState()
+    val isLoading = itemViewModel.isLoading.collectAsState().value
+    val error = itemViewModel.error.collectAsState().value
+
+    LaunchedEffect(itemId) {
+        itemViewModel.loadSingleItem(itemId)
+    }
+
+
+    if (isLoading) {
+        CircularProgressIndicator()
+    } else if (error != null) {
+        Text(text = error)
+    } else item?.let { ItemContent(item = it) }
+}
+
+@Composable
+fun ItemContent(item: Item) {
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.verticalScroll(scrollState)) {
-        items.forEach { item ->
-            item.immagini?.let { imageUrl ->
-                Image(
-                    painter = rememberAsyncImagePainter(model = imageUrl),
-                    contentDescription = "Immagine Prodotto",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp),
-                    contentScale = ContentScale.FillWidth
-                )
-            }
-
-            Text(
-                text = item.nome,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(16.dp)
-            )
-
-            Text(
-                text = item.descrizione ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-
-            Text(
-                text = "Prezzo: ${item.prezzo}€",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-
-            Text(
-                text = "Categoria: ${item.categoria}",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-
-            Text(
-                text = "Condizioni: ${item.condizioni}",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { /* Implementa l'azione al click */ },
+        item.immagini?.let { imageUrl ->
+            Image(
+                painter = rememberAsyncImagePainter(model = imageUrl),
+                contentDescription = "Immagine Prodotto",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text("Acquista")
-            }
+                    .height(300.dp),
+                contentScale = ContentScale.FillWidth
+            )
         }
+
+        Text(
+            text = item.nome,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(16.dp)
+        )
+
+        Text(
+            text = item.descrizione ?: "",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
+        Text(
+            text = "Prezzo: ${item.prezzo}€",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(16.dp)
+        )
+
+        // Continua ad aggiungere gli altri dettagli dell'item come prima
     }
 }
 
