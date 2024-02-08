@@ -61,7 +61,7 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
                     IconButton(onClick = { navController.navigate(Routes.FIRSTPAGE.route) }) {
                         Icon(imageVector = Icons.Default.Home, contentDescription = null)
                     }
-                    IconButton(onClick = { /* TODO: Gestire la navigazione per la ricerca */ }) {
+                    IconButton(onClick = { navController.navigate(Routes.SEARCH.route) }) {
                         Icon(imageVector = Icons.Default.Search, contentDescription = null)
                     }
                     IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
@@ -194,4 +194,6 @@ fun ItemDetailContent(item: Item) {
             }
         }
 }
+
+
 

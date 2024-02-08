@@ -159,6 +159,9 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
             val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
             ItemPage(itemViewModel = itemViewModel, itemId = itemId)
         }
+        composable(Routes.SEARCH.route){
+            SearchPage()
+        }
 
 
 
@@ -177,7 +180,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar() {
+fun SearchPage() {
     var value by remember { mutableStateOf(TextFieldValue("")) }
     Column {
         TextField(
@@ -194,7 +197,7 @@ fun SearchBar() {
             },
             label = { Text(text = "Ricerca") },
             modifier = Modifier
-                .size(400.dp, 60.dp)
+                .size(400.dp, 80.dp)
                 .padding(8.dp),
             singleLine = true,
             placeholder = { Text(text = "Cerca i prodotti!") }
