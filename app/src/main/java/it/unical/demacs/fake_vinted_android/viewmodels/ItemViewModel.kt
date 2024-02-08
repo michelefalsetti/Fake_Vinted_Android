@@ -36,11 +36,12 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
             _error.value = null
             try {
                 val token = sessionManager.getToken() // Assicurati che il token sia passato correttamente
-                val response = apiService.getItem(token, itemId)
+                val response = apiService.getItem("Bearer $token", itemId!!)
                 if (response.isSuccessful) {
                     _currentItem.value = response.body()
                 } else {
-                    _error.value = "Errore durante il caricamento dell'item: ${response.errorBody()?.string()}"
+                    val errorBody = response.errorBody()?.string()
+                    _error.value = "Errore durante il caricamento dell'item: $itemId, Codice: ${response.code()}"
                 }
             } catch (e: Exception) {
                 _error.value = "Errore di rete o del server: ${e.localizedMessage}"
