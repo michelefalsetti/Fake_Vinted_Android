@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "it.unical.demacs.fake_vinted_android"
-        minSdk = 30
+        minSdk = 29
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -63,7 +63,7 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    implementation ("androidx.compose.material3:material3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0") // o una versione più recente
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation ("com.github.bumptech.glide:compose:1.0.0-alpha.1")

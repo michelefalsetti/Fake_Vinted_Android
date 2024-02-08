@@ -1,4 +1,5 @@
 package it.unical.demacs.fake_vinted_android.ApiConfig
+import androidx.compose.ui.text.input.TextFieldValue
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
@@ -49,7 +50,6 @@ interface ApiService {
 
     @GET("/api/v3/search/{nome}/{token}")
     suspend fun getSearch(@Header("Authorization") token:String?, @Path("nome") nome: String, @Path("token") token_: String?): Response<List<Item>>
-
     @GET("/api/v2/Favorites/{token}")
     suspend fun getFavorites(@Header("Authorization") token:String?, @Path("token") token_: String): Response<List<Item>>
 

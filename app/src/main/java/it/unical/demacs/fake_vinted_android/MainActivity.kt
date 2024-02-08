@@ -1,20 +1,28 @@
 package it.unical.demacs.fake_vinted_android
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,10 +30,11 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,10 +52,12 @@ import androidx.navigation.compose.rememberNavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
+import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.ui.theme.Fake_Vinted_AndroidTheme
 import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserFormViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserViewModel
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
@@ -161,7 +172,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
             ItemPage(itemViewModel = itemViewModel, itemId = itemId)
         }
         composable(Routes.SEARCH.route){
-            SearchPage()
+            SearchPage(apiService = apiService, sessionManager = sessionManager, navHostController =navController )
         }
 
 
@@ -181,20 +192,43 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchPage() {
-    var value by remember { mutableStateOf(TextFieldValue("")) }
+fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navHostController: NavHostController) {
+    val token = sessionManager.getToken()
+    val searchResult = remember { mutableListOf<Item>() }
+    val coroutineScope = rememberCoroutineScope()
+    val showResult = remember { mutableStateOf(false) }
+    val showError = remember { mutableStateOf(false) }
+    var value by rememberSaveable { mutableStateOf("") }
+
     Column {
         TextField(
             value = value,
             onValueChange = { newText ->
+                searchResult.clear()
+                showResult.value = false
+                showError.value = false
                 value = newText
             },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "" +
-                            "search Icon"
-                )
+            trailingIcon = {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        val res = apiService.getSearch("Bearer $token", value, token)
+                        if (res.isSuccessful) {
+                            Log.d("funzionamento", "va")
+                            for (item in res.body()!!) {
+                                Log.d("oggetti", item.toString())
+                                searchResult.add(item)
+                            }
+                            showResult.value = true
+                            value = ""
+                        } else {
+                            Log.d("funzionamento", "non va")
+                        }
+                        Log.d("valore", "risultati : $searchResult")
+                    }
+                }) {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                }
             },
             label = { Text(text = "Ricerca") },
             modifier = Modifier
@@ -203,10 +237,24 @@ fun SearchPage() {
             singleLine = true,
             placeholder = { Text(text = "Cerca i prodotti!") }
         )
+        if (showResult.value) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(searchResult) { item ->
+                    ItemPreview(
+                        item,
+                        navHostController
+                    )
+                }
+            }
+        }
     }
-
-
 }
+
 
 
 
