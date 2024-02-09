@@ -45,6 +45,11 @@ import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -129,8 +134,24 @@ fun ItemPreview(item: Item, navController: NavController) {
                 )
 
             }
-            Text(item.nome, style = MaterialTheme.typography.titleMedium)
-            Text("Prezzo: ${item.prezzo}€", style = MaterialTheme.typography.bodyMedium)
+            Text(item.nome, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+                textAlign = TextAlign.Center)
+
+            val prezzoText = buildAnnotatedString {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("Prezzo: ")
+                }
+                append("${item.prezzo}€")
+            }
+
+            Text(
+                text = prezzoText,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(horizontal = 12.dp)
+
+            )
             // Aggiungi altre informazioni sull'articolo se necessario
         }
     }
@@ -150,11 +171,15 @@ fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel()) {
     }
 
 
-    if (isLoading) {
-        CircularProgressIndicator()
-    } else if (error != null) {
-        Text(text = error)
-    } else item?.let { ItemContent(item = it) }
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else if (error != null) {
+            Text(text = error)
+        } else item?.let {
+            ItemContent(item = it)
+        }
+    }
 }
 
 @Composable
@@ -182,32 +207,61 @@ fun ItemContent(item: Item) {
 
         Text(
             text = item.nome,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(16.dp)
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(horizontal = 16.dp,  vertical = 18.dp).fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
 
-        Text(
-            text = item.descrizione ?: "",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        val annotatedText = buildAnnotatedString {
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Descrizione: ")
+            }
+            append(item.descrizione)
+        }
 
         Text(
-            text = "Prezzo: ${item.prezzo}€",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(16.dp)
+            text = annotatedText,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(horizontal = 16.dp,  vertical = 10.dp)
         )
 
-        Text(
-            text = "Categoria: ${item.categoria}",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(16.dp)
-        )
+        val prezzoText = buildAnnotatedString {
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Prezzo: ")
+            }
+            append("${item.prezzo}€")
+        }
 
         Text(
-            text = "Condizioni: ${item.condizioni}",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(16.dp)
+            text = prezzoText,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(horizontal = 16.dp,  vertical = 10.dp)
+        )
+
+        val categoriaText = buildAnnotatedString {
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Categoria: ")
+            }
+            append(item.categoria)
+        }
+
+        Text(
+            text = categoriaText,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+        )
+
+        val condizioniText = buildAnnotatedString {
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Condizioni: ")
+            }
+            append(item.condizioni)
+        }
+
+        Text(
+            text = condizioniText,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(horizontal = 16.dp,  vertical = 10.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
