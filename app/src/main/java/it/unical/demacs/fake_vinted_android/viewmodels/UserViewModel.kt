@@ -2,93 +2,88 @@ package it.unical.demacs.fake_vinted_android.viewmodels
 
 import android.content.Context
 import android.net.Uri
+import android.net.http.HttpException
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import it.unical.demacs.fake_vinted_android.model.User
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
+import it.unical.demacs.fake_vinted_android.model.Wallet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-class UserViewModel(private val context: Context): ViewModel() {
+class UserViewModel(private val localContext: Context): ViewModel() {
 
-    private val _userState = MutableStateFlow(UserState())
-    val userState : StateFlow<UserState> = _userState.asStateFlow()
+    private val apiService: ApiService
+    private val sessionManager: SessionManager
 
-    fun updateUsername(username: String) {
-        val hasError = !UtenteDTO.validateUsername(username = username)
-        _userState.value = _userState.value.copy(
-            username = username,
-            isUsernameError = hasError
-        )
+    private val _user = MutableStateFlow<UtenteDTO?>(null)
+    val user: StateFlow<UtenteDTO?> = _user.asStateFlow()
+
+    private val _saldo = MutableStateFlow<Wallet?>(null)
+    val saldo: StateFlow<Wallet?> = _saldo.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
+    init {
+        sessionManager = SessionManager(localContext) // Create an instance of your SessionManager class
+        apiService = RetrofitClient.create(sessionManager)
     }
 
-    fun updateFirstName(firstName: String) {
-        val hasError = !UtenteDTO.validateFirstName(firstName = firstName)
-        _userState.value = _userState.value.copy(
-            firstName = firstName,
-            isFirstNameError = hasError
-        )
-    }
-
-    fun updateLastName(lastName : String) {
-        val hasError = !UtenteDTO.validateLastName(lastName = lastName)
-        _userState.value = _userState.value.copy(
-            lastName = lastName,
-            isLastNameError = hasError
-        )
-    }
-
-    fun updateEmail(email: String) {
-        val hasError = !UtenteDTO.validateEmail(email = email)
-        _userState.value = _userState.value.copy(
-            email = email,
-            isEmailError = hasError
-        )
-    }
-
-    fun updateBirthDate(birthDate: LocalDate) {
-        val hasError = !UtenteDTO.validateBirthDate(birthDate)
-        _userState.value = _userState.value.copy(
-            birthDate = birthDate,
-            isBirthDateError = hasError
-        )
-    }
-
-    fun updatePhoneNumber(phoneNumber: String) {
-        val hasError = !UtenteDTO.validatePhoneNumber(phoneNumber)
-        _userState.value = _userState.value.copy(
-            phoneNumber = phoneNumber,
-            isPhoneNumberError = hasError
-        )
-    }
-    fun onImageSelected(newImageUri: Uri?) {
-        if (newImageUri != null) {
-            // Aggiorna l'immagine del profilo
-            updateProfileImage(newImageUri)}}
-
-    fun updateProfileImage(uri: Uri) {// Converti l'Uri in String
-        val uriString = uri.toString()
-
-        // Salvare l'URI come stringa in SharedPreferences o nel database
-        val sharedPref = context.getSharedPreferences("Profile_Preferences", Context.MODE_PRIVATE)
-        with(sharedPref.edit()) {
-            putString("profile_image_uri", uriString)
-            apply()
+    fun getCurrentUser() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                val token = sessionManager.getToken() // Assicurati che il token sia passato correttamente
+                val response = apiService.getCurrentUser("Bearer $token", token)
+                if (response.isSuccessful) {
+                    // Aggiorna lo stato dell'utente con i dati ricevuti
+                    _user.value = response.body()
+                } else {
+                    // Gestisci l'errore, ad esempio aggiornando lo stato dell'utente con un messaggio di errore
+                    val errorBody = response.errorBody()?.string()
+                    _error.value = "Errore durante il recupero dell'utente: Codice: ${response.code()}, Messaggio: $errorBody"
+                }
+            } catch (e: Exception) {
+                _error.value = "Errore di rete o del server: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
         }
-
-        // Aggiorna lo stato locale se necessario
-        _userState.value = userState.value.copy(profileImageUrl = uriString)
     }
-    fun updateUserDetails(username: String, firstName: String, lastName: String) {
-        // Aggiorna lo stato locale
-        val updatedUserState = UserState(username, firstName, lastName)
-        _userState.value = updatedUserState
 
-
+    fun getsaldo(){
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                val token = sessionManager.getToken() // Assicurati che il token sia passato correttamente
+                val response = apiService.getSaldo("Bearer $token", token)
+                if (response.isSuccessful) {
+                    // Aggiorna lo stato dell'utente con i dati ricevuti
+                    _saldo.value = response.body()
+                } else {
+                    // Gestisci l'errore, ad esempio aggiornando lo stato dell'utente con un messaggio di errore
+                    val errorBody = response.errorBody()?.string()
+                    _error.value = "Errore durante il recupero dell'utente: Codice: ${response.code()}, Messaggio: $errorBody"
+                }
+            } catch (e: Exception) {
+                _error.value = "Errore di rete o del server: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
 
     }
 }

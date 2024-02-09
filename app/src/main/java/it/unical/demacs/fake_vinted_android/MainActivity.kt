@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -53,6 +51,7 @@ import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import it.unical.demacs.fake_vinted_android.model.Item
+import it.unical.demacs.fake_vinted_android.model.User
 import it.unical.demacs.fake_vinted_android.ui.theme.Fake_Vinted_AndroidTheme
 import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserFormViewModel
@@ -173,6 +172,14 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
                 ItemPage(itemId = it, itemViewModel = itemViewModel)
             }
         }
+
+        composable(Routes.PURCHASE.route) { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getString("itemId")?.toLong()
+            itemId?.let {
+                ItemPage(itemId = it, itemViewModel = itemViewModel)
+            }
+        }
+
         composable(Routes.SEARCH.route){
             SearchPage(apiService = apiService, sessionManager = sessionManager, navHostController =navController )
         }
