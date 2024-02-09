@@ -1,4 +1,5 @@
 package it.unical.demacs.fake_vinted_android.ApiConfig
+import android.app.Notification
 import androidx.compose.ui.text.input.TextFieldValue
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
@@ -24,9 +25,6 @@ interface ApiService {
     @GET("/api/v2/wallet/{token}")
     suspend fun getSaldo(@Header("Authorization") token:String?, @Path("token") token_: String?) : Response<Wallet>
 
-    @FormUrlEncoded
-    @POST("/api/v2/WalletCharge/{token}")
-    suspend fun wallet_recharge(@Header("Authorization") token:String?,  @Path("token") token_: String?, @Field("amount") amount: Int?) : Response<Unit>
 
     @FormUrlEncoded
     @POST("/api/v1/authenticate")
@@ -47,6 +45,9 @@ interface ApiService {
 
     @GET("/api/v3/item/{itemId}")
     suspend fun getItem(@Header("Authorization") token:String?, @Path("itemId") itemId: Long): Response<Item>
+
+    @GET("/api/v3/{token}/notification")
+    suspend fun getUserNotification(@Header("Authorization") token: String?,@Path("token") token_: String?): Response<List<Notification>>
 
     @GET("/api/v3/search/{nome}/{token}")
     suspend fun getSearch(@Header("Authorization") token:String?, @Path("nome") nome: String, @Path("token") token_: String?): Response<List<Item>>
@@ -88,9 +89,9 @@ interface ApiService {
     suspend fun getItemAcquistati(@Header("Authorization") token:String?, @Path("token") token_: String?): Response<List<Item>>
 
 
-    @FormUrlEncoded
-    @POST("/api/v1/addFavorites/{item}")
-    suspend fun addFavorites(@Header("Authorization") token:String?,  @Path("item") itemId: Long?, @Field("token") token_: String?) : Response<String>
 
+    @FormUrlEncoded
+    @POST("/{token}/addUserNotification")
+    suspend fun addUserNotification(@Header("Authorization") token: String?, @Path("token") pathToken: String?, @Field("idUtente") idUtente: Long): Response<String>
 
 }
