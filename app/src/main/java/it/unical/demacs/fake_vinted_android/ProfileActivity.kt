@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,13 +51,13 @@ fun ProfilePage(userViewModel: UserViewModel) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Immagine del profilo
-        ProfileImage(userState.profileImageUrl, userViewModel) { newImageUri: Uri? ->
-            // Qui puoi aggiornare il ViewModel con il nuovo URI dell'immagine
-            if (newImageUri != null) {
-                userViewModel.updateProfileImage(newImageUri)
-            }
-        }
+        Image(
+            painter = painterResource(id = R.drawable.icon),
+            contentDescription = "icona",
+            modifier = Modifier.size(150.dp)
+                .background(Color.Transparent)
+        )
+
 
 
         Spacer(modifier = Modifier.height(90.dp))
@@ -92,41 +93,9 @@ fun ProfilePage(userViewModel: UserViewModel) {
         Spacer(modifier = Modifier.weight(1f)) // Assicura che il contenuto non sia tagliato
     }
 
-
-
-
 }
-@Composable
-fun ProfileImage(imageUrl: String, userViewModel: UserViewModel, param: (Uri?) -> Unit) {
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri?->
-        imageUri = uri
-        userViewModel.onImageSelected(uri)
-        // Ottieni il percorso dell'immagine dalla URI
-    }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        if (imageUrl.isNotEmpty()) {
-            Image(
-                painter = rememberAsyncImagePainter(imageUrl),
-                contentDescription = "Immagine del profilo",
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-            )
-        } else {
-            // Mostra un placeholder se non c'è un'immagine
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(Color.Gray)
-            )
-        }
-        Button(onClick = { launcher.launch("image/*") }) {
-            Text("Cambia Immagine")
-        }
-    }
-}
+
+
 
 
 @Composable
