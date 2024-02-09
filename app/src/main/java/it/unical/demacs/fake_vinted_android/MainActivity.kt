@@ -177,6 +177,10 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
             SearchPage(apiService = apiService, sessionManager = sessionManager, navHostController =navController )
         }
 
+        composable(Routes.NOTIFICATION.route){
+            NotificationPage()
+        }
+
 
 
 

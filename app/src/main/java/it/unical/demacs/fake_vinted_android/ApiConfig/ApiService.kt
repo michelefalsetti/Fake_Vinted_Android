@@ -91,7 +91,7 @@ interface ApiService {
 
 
     @FormUrlEncoded
-    @POST("/{token}/addUserNotification")
+    @POST("api/v3/{token}/addUserNotification")
     suspend fun addUserNotification(@Header("Authorization") token: String?, @Path("token") pathToken: String?, @Field("idUtente") idUtente: Long): Response<String>
 
 }
