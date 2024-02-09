@@ -2,6 +2,7 @@ package it.unical.demacs.fake_vinted_android
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
@@ -22,7 +23,7 @@ enum class Routes(val route: String, val icon: ImageVector, val stringName: Int)
     PROFILE("profile", Icons.Default.Person, R.string.user_page),
     ITEM("item/{itemId}", Icons.Default.Info, R.string.item_description),
     SEARCH("search",Icons.Default.Search,R.string.search),
-    PURCHASE("purchase", Icons.Default.CheckCircle,R.string.purchased),
+    NOTIFICATION("noification/{token}",Icons.Default.Email,R.string.notification)
 
 
 }

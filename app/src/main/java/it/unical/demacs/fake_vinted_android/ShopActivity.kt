@@ -78,7 +78,7 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
                     IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
                         Icon(Icons.Default.Add, contentDescription = null)
                     }
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { navController.navigate(Routes.NOTIFICATION.route) }) {
                         Icon(Icons.Default.Email, contentDescription = null,
                         )
                     }
