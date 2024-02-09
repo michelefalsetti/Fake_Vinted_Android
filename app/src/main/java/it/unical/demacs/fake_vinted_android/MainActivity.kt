@@ -178,7 +178,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
         }
 
         composable(Routes.NOTIFICATION.route){
-            NotificationPage()
+            NotificationPage(apiService = apiService, sessionManager = sessionManager)
         }
 
 
@@ -220,7 +220,6 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navHostCo
                     coroutineScope.launch {
                         val res = apiService.getSearch("Bearer $token", value, token)
                         if (res.isSuccessful) {
-                            Log.d("funzionamento", "va")
                             for (item in res.body()!!) {
                                 Log.d("oggetti", item.toString())
                                 searchResult.add(item)

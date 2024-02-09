@@ -3,8 +3,8 @@ package it.unical.demacs.fake_vinted_android.model
 
 
 
-data class Notification(
+data class Notifications(
 
     val id: Long?,
-    var messaggio: String?
+    val messaggio: String?
 )

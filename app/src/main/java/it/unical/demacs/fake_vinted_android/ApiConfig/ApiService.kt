@@ -2,6 +2,7 @@ package it.unical.demacs.fake_vinted_android.ApiConfig
 import android.app.Notification
 import androidx.compose.ui.text.input.TextFieldValue
 import it.unical.demacs.fake_vinted_android.model.Item
+import it.unical.demacs.fake_vinted_android.model.Notifications
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
 import retrofit2.http.GET
@@ -47,7 +48,7 @@ interface ApiService {
     suspend fun getItem(@Header("Authorization") token:String?, @Path("itemId") itemId: Long): Response<Item>
 
     @GET("/api/v3/{token}/notification")
-    suspend fun getUserNotification(@Header("Authorization") token: String?,@Path("token") token_: String?): Response<List<Notification>>
+    suspend fun getUserNotification(@Header("Authorization") token: String?,@Path("token") token_: String?): Response<List<Notifications>>
 
     @GET("/api/v3/search/{nome}/{token}")
     suspend fun getSearch(@Header("Authorization") token:String?, @Path("nome") nome: String, @Path("token") token_: String?): Response<List<Item>>
