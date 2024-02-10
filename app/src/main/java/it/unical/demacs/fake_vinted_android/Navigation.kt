@@ -23,7 +23,8 @@ enum class Routes(val route: String, val icon: ImageVector, val stringName: Int)
     PROFILE("profile", Icons.Default.Person, R.string.user_page),
     ITEM("item/{itemId}", Icons.Default.Info, R.string.item_description),
     SEARCH("search",Icons.Default.Search,R.string.search),
-    NOTIFICATION("noification/{token}",Icons.Default.Email,R.string.notification)
+    NOTIFICATION("noification/{token}",Icons.Default.Email,R.string.notification),
+    PURCHASE("purchase/{itemId}", Icons.Default.CheckCircle,R.string.purchased),
 
 
 }

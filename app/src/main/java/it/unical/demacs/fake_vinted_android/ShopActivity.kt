@@ -159,7 +159,7 @@ fun ItemPreview(item: Item, navController: NavController) {
 
 
 @Composable
-fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel()) {
+fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel(), navController: NavController) {
 
 
     val item by itemViewModel.currentItem.collectAsState()
@@ -177,13 +177,13 @@ fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel()) {
         } else if (error != null) {
             Text(text = error)
         } else item?.let {
-            ItemContent(item = it)
+            ItemContent(item = it, navController = navController)
         }
     }
 }
 
 @Composable
-fun ItemContent(item: Item) {
+fun ItemContent(item: Item, navController: NavController ) {
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.verticalScroll(scrollState)) {
@@ -208,7 +208,9 @@ fun ItemContent(item: Item) {
         Text(
             text = item.nome,
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(horizontal = 16.dp,  vertical = 18.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 18.dp)
+                .fillMaxWidth(),
             textAlign = TextAlign.Center
         )
 
@@ -267,7 +269,7 @@ fun ItemContent(item: Item) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* Implementa l'azione al click */ },
+            onClick = { navController.navigate("purchase/${item.id}") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -276,4 +278,152 @@ fun ItemContent(item: Item) {
         }
     }
 }
+
+@Composable
+fun PurchasePage(itemId: Long, itemViewModel: ItemViewModel = viewModel()) {
+
+    val item by itemViewModel.currentItem.collectAsState()
+    val isLoading = itemViewModel.isLoading.collectAsState().value
+    val error = itemViewModel.error.collectAsState().value
+
+    LaunchedEffect(itemId) {
+        itemViewModel.loadSingleItem(itemId)
+    }
+
+
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else if (error != null) {
+            Text(text = error)
+        } else item?.let {
+            PurchaseContent(item = it)
+        }
+    }
+
+}
+@Composable
+fun PurchaseContent(item: Item) {
+
+    val prezzoProdotto = item.prezzo // Prezzo del prodotto
+    val costoSpedizione = 2.0 // Costo di spedizione fisso
+    val prezzoTotale = prezzoProdotto?.plus(costoSpedizione)
+
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Text(
+            text = "Pagamento",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier
+                .fillMaxWidth()
+                ,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        item.immagini?.let { imageUrl ->
+            val imageBitmap = remember {
+                val decodedBytes = Base64.decode(imageUrl.substringAfter(','), Base64.DEFAULT)
+                BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+            }
+            Image(
+                bitmap = imageBitmap.asImageBitmap(),
+                contentDescription = "Immagine Prodotto",
+                modifier = Modifier
+                    .height(300.dp)
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+        }
+
+        Text(
+            text = item.nome,
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 18.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        /*Text(
+            text = "Messo in vendita da ${item.venditore}", // Assicurati che l'item abbia un attributo 'venditore'
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )*/
+
+
+
+        val prezzoText = buildAnnotatedString {
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Prezzo prodotto: ")
+            }
+            append("${item.prezzo}€")
+        }
+
+        Text(
+            text = prezzoText,
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+        )
+
+        val spedizioneText = buildAnnotatedString {
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Costo spedizione: ")
+            }
+            append("${costoSpedizione}€")
+        }
+
+        Text(
+            text = spedizioneText,
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+        )
+
+        val totaleText = buildAnnotatedString {
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Prezzo totale: ")
+            }
+            append("${prezzoTotale}€")
+        }
+
+        Text(
+            text = totaleText,
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+        )
+
+
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { /* Implementa l'azione al click */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text("Paga con il Wallet",
+                    style = MaterialTheme.typography.titleMedium.copy( // Usa h5 come esempio per aumentare la dimensione, adattalo secondo necessità
+                    fontWeight = FontWeight.Bold))
+        }
+        Button(
+            onClick = { /* Implementa l'azione al click */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text("Paga con PayPal",
+                style = MaterialTheme.typography.titleMedium.copy( // Usa h5 come esempio per aumentare la dimensione, adattalo secondo necessità
+                    fontWeight = FontWeight.Bold))
+        }
+    }
+}
+
+
+
+
+
 

@@ -169,16 +169,17 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
         composable(Routes.ITEM.route) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId")?.toLong()
             itemId?.let {
-                ItemPage(itemId = it, itemViewModel = itemViewModel)
+                ItemPage(itemId = it, itemViewModel = itemViewModel, navController = navController)
             }
         }
 
         composable(Routes.PURCHASE.route) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId")?.toLong()
             itemId?.let {
-                ItemPage(itemId = it, itemViewModel = itemViewModel)
+                PurchasePage(itemId = it, itemViewModel = itemViewModel)
             }
         }
+
 
         composable(Routes.SEARCH.route){
             SearchPage(apiService = apiService, sessionManager = sessionManager, navHostController =navController )
