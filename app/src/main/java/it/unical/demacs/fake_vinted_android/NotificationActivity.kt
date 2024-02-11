@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
@@ -51,30 +52,30 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager) {
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text( text = "Notifiche",
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 130.dp))
-                }
-            )
-        }
-    ) {
+    Column {
+        Text(
+            text = "Notifiche",
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp,10.dp,0.dp,0.dp),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
 
         if (notificationResult.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+
             ) {
                 items(notificationResult) { notification ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(5.dp, 70.dp, 5.dp, 0.dp),
+                            .padding(10.dp),
+
                         elevation = CardDefaults.cardElevation()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -102,6 +103,7 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager) {
         }
     }
 }
+
 
 
 
