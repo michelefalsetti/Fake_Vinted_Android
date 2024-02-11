@@ -1,14 +1,29 @@
 package it.unical.demacs.fake_vinted_android
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,13 +41,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
 import it.unical.demacs.fake_vinted_android.viewmodels.UserViewModel
 
 
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ProfilePage(userViewModel: UserViewModel) {
+fun ProfilePage(userViewModel: UserViewModel,navController: NavController) {
     val userState by userViewModel.user.collectAsState()
     val saldoState by userViewModel.saldo.collectAsState()
 
@@ -44,26 +62,55 @@ fun ProfilePage(userViewModel: UserViewModel) {
     }
 
 
-    // Supponendo che user possa essere null (UtenteDTO?):
-    if (user != null) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.icon), // Assicurati che l'icona sia presente nelle tue risorse
-                contentDescription = "icona",
+    Scaffold(
+        bottomBar = {
+            BottomAppBar {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    IconButton(onClick = { navController.navigate(Routes.FIRSTPAGE.route) }) {
+                        Icon(imageVector = Icons.Default.Home, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.SEARCH.route) }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.NOTIFICATION.route) }) {
+                        Icon(
+                            Icons.Default.Email, contentDescription = null,
+                        )
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.PROFILE.route) }) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = null)
+                    }
+                }
+            }
+        }
+    ) {
+        // Supponendo che user possa essere null (UtenteDTO?):
+        if (user != null) {
+            Column(
                 modifier = Modifier
-                    .size(150.dp)
-                    .background(Color.Transparent)
-            )
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon), // Assicurati che l'icona sia presente nelle tue risorse
+                    contentDescription = "icona",
+                    modifier = Modifier
+                        .size(150.dp)
+                        .background(Color.Transparent)
+                )
 
-            Spacer(modifier = Modifier.height(90.dp))
+                Spacer(modifier = Modifier.height(90.dp))
 
-            // Chiama la funzione DisplayUserInfo per mostrare le informazioni dell'utente
-            saldoState?.let { DisplayUserInfo(user = user, saldo = it) }
+                // Chiama la funzione DisplayUserInfo per mostrare le informazioni dell'utente
+                saldoState?.let { DisplayUserInfo(user = user, saldo = it) }
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package it.unical.demacs.fake_vinted_android
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -8,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,12 +19,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -158,10 +166,10 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
 
 
         composable(Routes.ADDITEM.route) {
-            AddItem(navController,apiService,sessionManager) // La composable per aggiungere un articolo
+            AddItem(navController,apiService,sessionManager,navController) // La composable per aggiungere un articolo
         }
         composable(Routes.PROFILE.route) {
-            ProfilePage(userViewModel = userViewModel)
+            ProfilePage(userViewModel = userViewModel, navController = navController)
         }
         composable(Routes.FIRSTPAGE.route) {
             HomePage(itemViewModel = itemViewModel, navController)
@@ -182,31 +190,21 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
 
 
         composable(Routes.SEARCH.route){
-            SearchPage(apiService = apiService, sessionManager = sessionManager, navHostController =navController )
+            SearchPage(apiService = apiService, sessionManager = sessionManager, navController =navController )
         }
 
         composable(Routes.NOTIFICATION.route){
-            NotificationPage(apiService = apiService, sessionManager = sessionManager)
+            NotificationPage(apiService = apiService, sessionManager = sessionManager, navController = navController)
         }
 
-
-
-
-
-
-
-
-
-
-
-        // ... altre composable per altre rotte ...
     }
 
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navHostController: NavHostController) {
+fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navController: NavHostController) {
     val token = sessionManager.getToken()
     val searchResult = remember { mutableListOf<Item>() }
     val coroutineScope = rememberCoroutineScope()
@@ -214,54 +212,83 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navHostCo
     val showError = remember { mutableStateOf(false) }
     var value by rememberSaveable { mutableStateOf("") }
 
-    Column {
-        TextField(
-            value = value,
-            onValueChange = { newText ->
-                searchResult.clear()
-                showResult.value = false
-                showError.value = false
-                value = newText
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    coroutineScope.launch {
-                        val res = apiService.getSearch("Bearer $token", value, token)
-                        if (res.isSuccessful) {
-                            for (item in res.body()!!) {
-                                Log.d("oggetti", item.toString())
-                                searchResult.add(item)
-                            }
-                            showResult.value = true
-                            value = ""
-                        } else {
-                            Log.d("funzionamento", "non va")
-                        }
-                        Log.d("valore", "risultati : $searchResult")
+    Scaffold(
+        bottomBar = {
+            BottomAppBar {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    IconButton(onClick = { navController.navigate(Routes.FIRSTPAGE.route) }) {
+                        Icon(imageVector = Icons.Default.Home, contentDescription = null)
                     }
-                }) {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                    IconButton(onClick = { navController.navigate(Routes.SEARCH.route) }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.NOTIFICATION.route) }) {
+                        Icon(
+                            Icons.Default.Email, contentDescription = null,
+                        )
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.PROFILE.route) }) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = null)
+                    }
                 }
-            },
-            label = { Text(text = "Ricerca") },
-            modifier = Modifier
-                .size(400.dp, 80.dp)
-                .padding(8.dp),
-            singleLine = true,
-            placeholder = { Text(text = "Cerca i prodotti!") }
-        )
-        if (showResult.value) {
-            LazyColumn(
+            }
+        }
+    ) {
+        Column {
+            TextField(
+                value = value,
+                onValueChange = { newText ->
+                    searchResult.clear()
+                    showResult.value = false
+                    showError.value = false
+                    value = newText
+                },
+                trailingIcon = {
+                    IconButton(onClick = {
+                        coroutineScope.launch {
+                            val res = apiService.getSearch("Bearer $token", value, token)
+                            if (res.isSuccessful) {
+                                for (item in res.body()!!) {
+                                    Log.d("oggetti", item.toString())
+                                    searchResult.add(item)
+                                }
+                                showResult.value = true
+                                value = ""
+                            } else {
+                                Log.d("funzionamento", "non va")
+                            }
+                            Log.d("valore", "risultati : $searchResult")
+                        }
+                    }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                    }
+                },
+                label = { Text(text = "Ricerca") },
                 modifier = Modifier
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                items(searchResult) { item ->
-                    ItemPreview(
-                        item,
-                        navHostController
-                    )
+                    .size(400.dp, 80.dp)
+                    .padding(8.dp),
+                singleLine = true,
+                placeholder = { Text(text = "Cerca i prodotti!") }
+            )
+            if (showResult.value) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    items(searchResult) { item ->
+                        ItemPreview(
+                            item,
+                            navController
+                        )
+                    }
                 }
             }
         }

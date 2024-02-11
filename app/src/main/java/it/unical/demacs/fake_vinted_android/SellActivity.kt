@@ -55,15 +55,26 @@ import java.util.Locale.Category
 import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("RememberReturnType")
+@SuppressLint("RememberReturnType", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AddItem(navHostController: NavHostController, apiService: ApiService, sessionManager: SessionManager) {
+fun AddItem(navHostController: NavHostController, apiService: ApiService, sessionManager: SessionManager,navController: NavController) {
     val commonModifier = Modifier
         .fillMaxWidth()
         .padding(20.dp)
@@ -101,184 +112,224 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
     }
 
 
-    LazyColumn(
-        modifier = Modifier.padding(all = 3.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Scaffold(
+        bottomBar = {
+            BottomAppBar {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    IconButton(onClick = { navController.navigate(Routes.FIRSTPAGE.route) }) {
+                        Icon(imageVector = Icons.Default.Home, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.SEARCH.route) }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.NOTIFICATION.route) }) {
+                        Icon(
+                            Icons.Default.Email, contentDescription = null,
+                        )
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.PROFILE.route) }) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = null)
+                    }
+                }
+            }
+        }
     ) {
+        LazyColumn(
+            modifier = Modifier.padding(all = 3.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-        item {
-            Spacer(modifier = Modifier.height(90.dp))
+            item {
 
-            base64Image.value?.let { base64String ->
-                val imageBitmap = remember {
-                    val decodedBytes = Base64.decode(base64String.substringAfter(','), Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                base64Image.value?.let { base64String ->
+                    val imageBitmap = remember {
+                        val decodedBytes =
+                            Base64.decode(base64String.substringAfter(','), Base64.DEFAULT)
+                        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                    }
+                    Image(
+                        bitmap = imageBitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(400.dp)
+                            .padding(20.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
+                    )
                 }
-                Image(
-                    bitmap = imageBitmap.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(400.dp)
-                        .padding(20.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
+
+
+                //Spacer(modifier = Modifier.weight(0.2f))
+                InputField(
+                    name = stringResource(R.string.item_title),
+                    reducedPaddingModifier,
+                    nameState
                 )
-            }
-
-
-            //Spacer(modifier = Modifier.weight(0.2f))
-            InputField(name = stringResource(R.string.item_title), reducedPaddingModifier, nameState)
-            InputField(name = stringResource(R.string.item_description), reducedPaddingModifier, descriptionState)
-            InputField(name = stringResource(R.string.item_price), reducedPaddingModifier, priceState)
-
-            val CategoryOptions = listOf("Clothes","Shoes", "Accessories", "Other")
-            var expanded by remember { mutableStateOf(false) }
-            var selectedOptionText by remember { mutableStateOf("") }
-
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded },
-            ) {
-                TextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 5.dp)
-                        .menuAnchor(),
-                    readOnly = true,
-                    value = selectedOptionText,
-                    onValueChange = {},
-                    label = { Text("Category") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                InputField(
+                    name = stringResource(R.string.item_description),
+                    reducedPaddingModifier,
+                    descriptionState
                 )
-                ExposedDropdownMenu(
+                InputField(
+                    name = stringResource(R.string.item_price),
+                    reducedPaddingModifier,
+                    priceState
+                )
+
+                val CategoryOptions = listOf("Vestiti", "Scarpe", "Accessori", "Altro")
+                var expanded by remember { mutableStateOf(false) }
+                var selectedOptionText by remember { mutableStateOf("") }
+
+                ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false },
+                    onExpandedChange = { expanded = !expanded },
                 ) {
-                    CategoryOptions.forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = { Text(selectionOption) },
-                            onClick = {
-                                selectedOptionText = selectionOption
-                                expanded = false
-                            },
-                        )
-                    }
-                }
-            }
-
-            val ConditionOptions = listOf("New with tag","New without tag","Very good","Good","Satisfactory")
-            var expanded1 by remember { mutableStateOf(false) }
-            var selectedOptionText1 by remember { mutableStateOf("") }
-
-            ExposedDropdownMenuBox(
-                expanded = expanded1,
-                onExpandedChange = { expanded1 = !expanded },
-            ) {
-                TextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 5.dp)
-                        .menuAnchor(),
-                    readOnly = true,
-                    value = selectedOptionText1,
-                    onValueChange = {},
-                    label = { Text("Condition") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded1) },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded1,
-                    onDismissRequest = { expanded = false },
-                ) {
-                    ConditionOptions.forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = { Text(selectionOption) },
-                            onClick = {
-                                selectedOptionText1 = selectionOption
-                                expanded1 = false
-
-                            },
-                        )
-                    }
-                }
-            }
-
-
-            Button(
-                modifier = commonModifier
-                    .padding(vertical = 30.dp)
-                    .height(IntrinsicSize.Max),
-                onClick = { launcher.launch("image/*") }
-            ) {
-                Text(stringResource(R.string.add_item_image))
-            }
-
-
-            Button(content = {
-                Text(stringResource(R.string.add_item_sale))
-
-            },
-                modifier = commonModifier
-                    .padding(vertical = 30.dp)
-                    .height(IntrinsicSize.Max),
-                onClick = {
-                    val nome = nameState.value
-                    val descrizione = descriptionState.value
-                    val price = priceState.value.toBigDecimal()
-                    val categoria = selectedOptionText
-                    val condizioni = selectedOptionText1
-                    coroutineScope.launch {
-                        try {
-                            showDialog.value = true
-                            val response = apiService.addItem(
-                                "Bearer $token",
-                                token,
-                                nome,
-                                descrizione,
-                                price,
-                                base64Image.value?:"",
-                                categoria,
-                                condizioni
+                    TextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 5.dp)
+                            .menuAnchor(),
+                        readOnly = true,
+                        value = selectedOptionText,
+                        onValueChange = {},
+                        label = { Text("Categoria") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                    ) {
+                        CategoryOptions.forEach { selectionOption ->
+                            DropdownMenuItem(
+                                text = { Text(selectionOption) },
+                                onClick = {
+                                    selectedOptionText = selectionOption
+                                    expanded = false
+                                },
                             )
-                        } catch (e : Exception){
-
                         }
                     }
-
-
-
-
                 }
-            )
-            if (showDialog.value) {
-                AlertDialog(
-                    onDismissRequest = {
-                        showDialog.value = false
-                    },
-                    title = {
-                        Text(text = stringResource(R.string.add_item_ok))
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                navHostController.navigate(Routes.FIRSTPAGE.route)
-                                showDialog.value = false // Chiudi il popup
-                            }
-                        ) {
-                            Text(text = "OK")
+
+                val ConditionOptions =
+                    listOf("Nuovo con cartellino", "Nuovo senza cartellino", "Ottime", "Buone", "Discrete")
+                var expanded1 by remember { mutableStateOf(false) }
+                var selectedOptionText1 by remember { mutableStateOf("") }
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded1,
+                    onExpandedChange = { expanded1 = !expanded },
+                ) {
+                    TextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 5.dp)
+                            .menuAnchor(),
+                        readOnly = true,
+                        value = selectedOptionText1,
+                        onValueChange = {},
+                        label = { Text("Condizioni") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded1) },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded1,
+                        onDismissRequest = { expanded = false },
+                    ) {
+                        ConditionOptions.forEach { selectionOption ->
+                            DropdownMenuItem(
+                                text = { Text(selectionOption) },
+                                onClick = {
+                                    selectedOptionText1 = selectionOption
+                                    expanded1 = false
+
+                                },
+                            )
                         }
-                    },
-                    modifier = Modifier.padding(16.dp)
+                    }
+                }
+
+
+                Button(
+                    modifier = commonModifier
+                        .padding(vertical = 5.dp)
+                        .height(IntrinsicSize.Max),
+                    onClick = { launcher.launch("image/*") }
+                ) {
+                    Text(text = "Carica immagine")
+                }
+
+
+                Button(content = {
+                    Text(text = "Metti in vendita")
+
+                },
+                    modifier = commonModifier
+                        .padding(vertical = 30.dp)
+                        .height(IntrinsicSize.Max),
+                    onClick = {
+                        val nome = nameState.value
+                        val descrizione = descriptionState.value
+                        val price = priceState.value.toBigDecimal()
+                        val categoria = selectedOptionText
+                        val condizioni = selectedOptionText1
+                        coroutineScope.launch {
+                            try {
+                                showDialog.value = true
+                                val response = apiService.addItem(
+                                    "Bearer $token",
+                                    token,
+                                    nome,
+                                    descrizione,
+                                    price,
+                                    base64Image.value ?: "",
+                                    categoria,
+                                    condizioni
+                                )
+                            } catch (e: Exception) {
+
+                            }
+                        }
+
+
+                    }
+                )
+                if (showDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            showDialog.value = false
+                        },
+                        title = {
+                            Text(text = stringResource(R.string.add_item_ok))
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    navHostController.navigate(Routes.FIRSTPAGE.route)
+                                    showDialog.value = false // Chiudi il popup
+                                }
+                            ) {
+                                Text(text = "OK")
+                            }
+                        },
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+
+                Text(
+                    text = "Back Home",
+                    modifier = Modifier
+                        .padding(vertical = 15.dp)
+                        .clickable(onClick = { navHostController.navigate(Routes.FIRSTPAGE.route) })
                 )
             }
-
-            Text(
-                text = "Back Home",
-                modifier = Modifier
-                    .padding(vertical = 15.dp)
-                    .clickable(onClick = { navHostController.navigate(Routes.FIRSTPAGE.route) })
-            )
         }
     }
 }
@@ -293,19 +344,20 @@ fun InputField(name: String, modifier: Modifier, fieldState: MutableState<String
             TextField(
                 value = fieldState.value,
                 onValueChange = { newValue ->
-                    fieldState.value = newValue },
+                    fieldState.value = newValue
+                },
                 label = { Text(name) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
                 modifier = modifier.padding(vertical = 5.dp)
             )
-        }
-        else {
+        } else {
             TextField(
                 value = fieldState.value,
                 onValueChange = { newValue ->
-                    fieldState.value = newValue },
+                    fieldState.value = newValue
+                },
                 label = { Text(name) },
                 singleLine = true,
                 modifier = modifier.padding(vertical = 5.dp)
