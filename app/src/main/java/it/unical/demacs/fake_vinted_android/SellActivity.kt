@@ -323,12 +323,6 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     )
                 }
 
-                Text(
-                    text = "Back Home",
-                    modifier = Modifier
-                        .padding(vertical = 15.dp)
-                        .clickable(onClick = { navHostController.navigate(Routes.FIRSTPAGE.route) })
-                )
             }
         }
     }

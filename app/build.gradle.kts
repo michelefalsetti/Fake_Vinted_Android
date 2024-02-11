@@ -61,6 +61,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation ("com.paypal.sdk:paypal-android-sdk:2.14.2")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation ("androidx.compose.material3:material3")
