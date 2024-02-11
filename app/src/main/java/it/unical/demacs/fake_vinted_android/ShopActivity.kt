@@ -180,6 +180,7 @@ fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel(), navContro
 
     LaunchedEffect(itemId) {
         itemViewModel.loadSingleItem(itemId)
+
     }
 
 
@@ -305,6 +306,7 @@ fun PurchasePage(itemId: Long, itemViewModel: ItemViewModel = viewModel(),userVi
     LaunchedEffect(itemId) {
         itemViewModel.loadSingleItem(itemId)
         userViewModel.getsaldo()
+        userViewModel.getCurrentUser()
     }
     saldoState?.let { Log.d("saldo", saldoState!!.saldo.toString())}
 
@@ -315,20 +317,22 @@ fun PurchasePage(itemId: Long, itemViewModel: ItemViewModel = viewModel(),userVi
         } else if (error != null) {
             Text(text = error)
         } else item?.let {
-            saldoState?.let { it1 -> PurchaseContent(item = it, wallet = it1,apiService,sessionManager, navController) }
+            saldoState?.let { it1 -> PurchaseContent(item = it, wallet = it1,apiService,sessionManager, navController,userViewModel) }
         }
     }
 
 }
 @Composable
-fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionManager: SessionManager,navController: NavController) {
+fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionManager: SessionManager,navController: NavController,userViewModel: UserViewModel) {
     val token = sessionManager.getToken()
+    val userState by userViewModel.user.collectAsState()
     val prezzoProdotto = item.prezzo // Prezzo del prodotto
     val costoSpedizione = 2.99 // Costo di spedizione fisso
     val prezzoTotale = prezzoProdotto?.plus(costoSpedizione)
     val coroutineScope = rememberCoroutineScope()
     var successDialogVisible by remember { mutableStateOf(false) }
     var insufficientBalanceDialogVisible by remember { mutableStateOf(false) }
+
 
 
 
@@ -421,7 +425,7 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
 
                         item.idUtente?.let {
                             apiService.addUserNotification("Bearer $token",token,
-                                it,"Il tuo articolo ${item.nome} è stato venduto!")
+                                it,"L'utente ${userState?.username} ha acquistato il tuo prodotto ${item.nome}!" )
                         }
                         successDialogVisible = true
 

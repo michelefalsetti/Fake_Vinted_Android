@@ -31,6 +31,9 @@
         <activity android:name=".AuthenticationActivity">
             <!-- Altre impostazioni per l'activity se necessario -->
         </activity>
+        <meta-data
+            android:name="com.paypal.android.sdk.ClientId"
+            android:value="YARF4ZXuXMpYEPoeesvP9ZSU-mBNyVTvAmDv9XK9eJOU--hU3KJG7yew_3sxjnwoM5QHhSkVWF5NtALGA" />
     </application>
 
 </manifest>
