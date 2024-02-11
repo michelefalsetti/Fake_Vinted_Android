@@ -507,6 +507,7 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
                 ) {
                     Text(text = "OK")
                 }
+
             }
         )
     }

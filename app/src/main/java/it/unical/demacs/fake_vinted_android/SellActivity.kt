@@ -54,7 +54,10 @@ import kotlinx.coroutines.launch
 import java.util.Locale.Category
 import android.graphics.BitmapFactory
 import android.util.Base64
+import android.util.SparseArray
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -68,13 +71,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("RememberReturnType", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AddItem(navHostController: NavHostController, apiService: ApiService, sessionManager: SessionManager,navController: NavController) {
+fun AddItem(navHostController: NavHostController, apiService: ApiService, sessionManager: SessionManager, navController: NavController) {
     val commonModifier = Modifier
         .fillMaxWidth()
         .padding(20.dp)
@@ -90,17 +94,11 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
     val context = LocalContext.current
     val base64Image = remember { mutableStateOf<String?>(null) }
 
-
     val reducedPaddingModifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 20.dp, vertical = 5.dp) // Riduci il padding verticale
 
-
-
-
-
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri?->
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUri = uri
         // Ottieni il percorso dell'immagine dalla URI
         val imageInputStream = context.contentResolver.openInputStream(uri!!)
@@ -110,7 +108,6 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
             base64Image.value = Base64.encodeToString(imageByteArray, Base64.DEFAULT)
         }
     }
-
 
     Scaffold(
         bottomBar = {
@@ -141,10 +138,9 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
         }
     ) {
         LazyColumn(
-            modifier = Modifier.padding(all = 3.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .padding(all = 3.dp)
         ) {
-
             item {
 
                 base64Image.value?.let { base64String ->
@@ -164,8 +160,8 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     )
                 }
 
+                Spacer(modifier = Modifier.height(16.dp)) // Spazio tra i campi di input e il primo Button
 
-                //Spacer(modifier = Modifier.weight(0.2f))
                 InputField(
                     name = stringResource(R.string.item_title),
                     reducedPaddingModifier,
@@ -256,7 +252,6 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     }
                 }
 
-
                 Button(
                     modifier = commonModifier
                         .padding(vertical = 5.dp)
@@ -266,13 +261,9 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     Text(text = "Carica immagine")
                 }
 
-
-                Button(content = {
-                    Text(text = "Metti in vendita")
-
-                },
+                Button(
                     modifier = commonModifier
-                        .padding(vertical = 30.dp)
+                        .padding(vertical = 8.dp)
                         .height(IntrinsicSize.Max),
                     onClick = {
                         val nome = nameState.value
@@ -297,36 +288,17 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
 
                             }
                         }
-
-
                     }
-                )
-                if (showDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            showDialog.value = false
-                        },
-                        title = {
-                            Text(text = stringResource(R.string.add_item_ok))
-                        },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    navHostController.navigate(Routes.FIRSTPAGE.route)
-                                    showDialog.value = false // Chiudi il popup
-                                }
-                            ) {
-                                Text(text = "OK")
-                            }
-                        },
-                        modifier = Modifier.padding(16.dp)
-                    )
+                ) {
+                    Text(text = "Metti in vendita")
                 }
+                Spacer(modifier = Modifier.padding(50.dp))
 
             }
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
