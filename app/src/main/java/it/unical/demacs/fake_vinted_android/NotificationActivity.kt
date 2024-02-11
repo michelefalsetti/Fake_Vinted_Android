@@ -21,8 +21,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -37,15 +40,14 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationPage(apiService: ApiService, sessionManager: SessionManager) {
-    var notificationResult = remember { mutableListOf<Notifications>() }
+    var notificationResult by remember { mutableStateOf<List<Notifications>>(emptyList()) }
     val token = sessionManager.getToken()
     val coroutineScope = rememberCoroutineScope()
 
-    // Launching the coroutine to fetch notifications
-    coroutineScope.launch {
-        val res = apiService.getUserNotification("Bearer $token", token)
-        for (notification in res.body()!!) {
-            notificationResult.add(notification)
+    LaunchedEffect(token) {
+        if (notificationResult.isEmpty()) {
+            val res = apiService.getUserNotification("Bearer $token", token)
+            notificationResult = res.body() ?: emptyList()
         }
     }
 
@@ -102,7 +104,7 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager) {
 }
 
 
-    
+
 
 
 
