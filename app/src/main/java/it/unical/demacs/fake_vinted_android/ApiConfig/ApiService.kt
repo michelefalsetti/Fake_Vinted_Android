@@ -1,18 +1,14 @@
 package it.unical.demacs.fake_vinted_android.ApiConfig
-import android.app.Notification
-import androidx.compose.ui.text.input.TextFieldValue
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.Notifications
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
 import retrofit2.http.GET
 import retrofit2.Response
-import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Path
 import java.math.BigDecimal
 
@@ -82,7 +78,7 @@ interface ApiService {
 
     @FormUrlEncoded
     @POST("/api/v1/buyItem/{item}")
-    suspend fun buyItem(@Header("Authorization") token:String?,  @Path("item") itemId: Long?, @Field("token") token_: String?) : Response<Unit>
+    suspend fun buyItem(@Header("Authorization") token:String?, @Path("item") itemId: Long?, @Field("token") token_: String?, @Field("prezzoTotale") prezzoTotale: Double?) : Response<Unit>
     @GET("/api/v1/SaldoOk/{itemId}/{token}")
     suspend fun saldo(@Header("Authorization") token:String?, @Path("itemId") itemId: Long, @Path("token") token_: String?): Response<Unit>
 
@@ -90,9 +86,16 @@ interface ApiService {
     suspend fun getItemAcquistati(@Header("Authorization") token:String?, @Path("token") token_: String?): Response<List<Item>>
 
 
-
     @FormUrlEncoded
-    @POST("api/v3/{token}/addUserNotification")
-    suspend fun addUserNotification(@Header("Authorization") token: String?, @Path("token") pathToken: String?, @Field("idUtente") idUtente: Long): Response<String>
+    @POST("/api/v3/addUserNotification/{token}")
+    suspend fun addUserNotification(
+        @Header("Authorization") token: String?,
+        @Path("token") token_: String?,
+        @Field("idUtente") idUtente: Long,
+        @Field("messaggio") messaggio: String
+    ): Response<String>
+
+
+
 
 }

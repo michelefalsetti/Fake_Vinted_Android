@@ -1,6 +1,9 @@
 package it.unical.demacs.fake_vinted_android
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
+import android.util.Base64
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -30,26 +34,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import coil.compose.rememberAsyncImagePainter
-import it.unical.demacs.fake_vinted_android.model.Item
-import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
 import androidx.compose.ui.graphics.asImageBitmap
-import android.graphics.BitmapFactory
-import android.util.Base64
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
+import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
+import it.unical.demacs.fake_vinted_android.model.Item
+import it.unical.demacs.fake_vinted_android.model.Wallet
+import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
+import it.unical.demacs.fake_vinted_android.viewmodels.UserViewModel
+import kotlinx.coroutines.launch
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -79,7 +90,8 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
                         Icon(Icons.Default.Add, contentDescription = null)
                     }
                     IconButton(onClick = { navController.navigate(Routes.NOTIFICATION.route) }) {
-                        Icon(Icons.Default.Email, contentDescription = null,
+                        Icon(
+                            Icons.Default.Email, contentDescription = null,
                         )
                     }
                     IconButton(onClick = { navController.navigate(Routes.PROFILE.route) }) {
@@ -279,16 +291,22 @@ fun ItemContent(item: Item, navController: NavController ) {
     }
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun PurchasePage(itemId: Long, itemViewModel: ItemViewModel = viewModel()) {
+fun PurchasePage(itemId: Long, itemViewModel: ItemViewModel = viewModel(),userViewModel: UserViewModel, apiService: ApiService,sessionManager: SessionManager,navController: NavController) {
 
+    val saldoState by userViewModel.saldo.collectAsState()
     val item by itemViewModel.currentItem.collectAsState()
     val isLoading = itemViewModel.isLoading.collectAsState().value
     val error = itemViewModel.error.collectAsState().value
 
+
+
     LaunchedEffect(itemId) {
         itemViewModel.loadSingleItem(itemId)
+        userViewModel.getsaldo()
     }
+    saldoState?.let { Log.d("saldo", saldoState!!.saldo.toString())}
 
 
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -297,25 +315,29 @@ fun PurchasePage(itemId: Long, itemViewModel: ItemViewModel = viewModel()) {
         } else if (error != null) {
             Text(text = error)
         } else item?.let {
-            PurchaseContent(item = it)
+            saldoState?.let { it1 -> PurchaseContent(item = it, wallet = it1,apiService,sessionManager, navController) }
         }
     }
 
 }
 @Composable
-fun PurchaseContent(item: Item) {
-
+fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionManager: SessionManager,navController: NavController) {
+    val token = sessionManager.getToken()
     val prezzoProdotto = item.prezzo // Prezzo del prodotto
-    val costoSpedizione = 2.0 // Costo di spedizione fisso
+    val costoSpedizione = 2.99 // Costo di spedizione fisso
     val prezzoTotale = prezzoProdotto?.plus(costoSpedizione)
+    val coroutineScope = rememberCoroutineScope()
+    var successDialogVisible by remember { mutableStateOf(false) }
+    var insufficientBalanceDialogVisible by remember { mutableStateOf(false) }
+
+
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Text(
             text = "Pagamento",
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier
-                .fillMaxWidth()
-                ,
+                .fillMaxWidth(),
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -345,14 +367,6 @@ fun PurchaseContent(item: Item) {
                 .fillMaxWidth(),
             textAlign = TextAlign.Center
         )
-
-        /*Text(
-            text = "Messo in vendita da ${item.venditore}", // Assicurati che l'item abbia un attributo 'venditore'
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )*/
-
 
 
         val prezzoText = buildAnnotatedString {
@@ -400,14 +414,29 @@ fun PurchaseContent(item: Item) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* Implementa l'azione al click */ },
+            onClick = {
+                if (wallet.saldo >= prezzoTotale!!) {
+                    coroutineScope.launch {
+                        apiService.buyItem("Bearer $token", item.id, token, prezzoTotale)
+                        successDialogVisible = true
+
+                    }
+                } else {
+                    insufficientBalanceDialogVisible = true
+                }
+
+
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text("Paga con il Wallet",
-                    style = MaterialTheme.typography.titleMedium.copy( // Usa h5 come esempio per aumentare la dimensione, adattalo secondo necessità
-                    fontWeight = FontWeight.Bold))
+            Text(
+                "Paga con il Wallet",
+                style = MaterialTheme.typography.titleMedium.copy( // Usa h5 come esempio per aumentare la dimensione, adattalo secondo necessità
+                    fontWeight = FontWeight.Bold
+                )
+            )
         }
         Button(
             onClick = { /* Implementa l'azione al click */ },
@@ -415,10 +444,62 @@ fun PurchaseContent(item: Item) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text("Paga con PayPal",
+            Text(
+                "Paga con PayPal",
                 style = MaterialTheme.typography.titleMedium.copy( // Usa h5 come esempio per aumentare la dimensione, adattalo secondo necessità
-                    fontWeight = FontWeight.Bold))
+                    fontWeight = FontWeight.Bold
+                )
+            )
         }
+    }
+
+    if (successDialogVisible) {
+        AlertDialog(
+            onDismissRequest = {
+                successDialogVisible = false
+            },
+            title = {
+                Text(text = "Pagamento completato")
+            },
+            text = {
+                Text(text = "Il pagamento è stato completato con successo!")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        successDialogVisible = false
+                        navController.navigate(Routes.FIRSTPAGE.route)
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            }
+        )
+    }
+
+
+    if (insufficientBalanceDialogVisible) {
+        AlertDialog(
+            onDismissRequest = {
+                insufficientBalanceDialogVisible = false
+            },
+            title = {
+                Text(text = "Saldo insufficiente")
+            },
+            text = {
+                Text(text = "Il tuo saldo non è sufficiente per effettuare il pagamento.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        insufficientBalanceDialogVisible = false
+
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            }
+        )
     }
 }
 

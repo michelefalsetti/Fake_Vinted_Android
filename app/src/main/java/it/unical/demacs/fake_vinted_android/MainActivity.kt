@@ -176,7 +176,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
         composable(Routes.PURCHASE.route) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId")?.toLong()
             itemId?.let {
-                PurchasePage(itemId = it, itemViewModel = itemViewModel)
+                PurchasePage(itemId = it, itemViewModel = itemViewModel, userViewModel = userViewModel, apiService = apiService, sessionManager = sessionManager, navController = navController)
             }
         }
 
