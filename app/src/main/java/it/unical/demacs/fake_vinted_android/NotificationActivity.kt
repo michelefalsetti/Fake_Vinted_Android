@@ -91,7 +91,6 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager) {
                 }
             }
         } else {
-            // No notifications, display a message
             Box(
                 modifier = Modifier
                     .fillMaxSize()

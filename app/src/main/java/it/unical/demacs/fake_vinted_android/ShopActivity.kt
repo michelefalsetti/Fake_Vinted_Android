@@ -418,6 +418,11 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
                 if (wallet.saldo >= prezzoTotale!!) {
                     coroutineScope.launch {
                         apiService.buyItem("Bearer $token", item.id, token, prezzoTotale)
+
+                        item.idUtente?.let {
+                            apiService.addUserNotification("Bearer $token",token,
+                                it,"Il tuo articolo ${item.nome} è stato venduto!")
+                        }
                         successDialogVisible = true
 
                     }

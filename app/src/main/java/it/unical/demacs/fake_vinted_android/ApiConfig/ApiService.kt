@@ -93,7 +93,7 @@ interface ApiService {
         @Path("token") token_: String?,
         @Field("idUtente") idUtente: Long,
         @Field("messaggio") messaggio: String
-    ): Response<String>
+    ): Response<Notifications>
 
 
 
