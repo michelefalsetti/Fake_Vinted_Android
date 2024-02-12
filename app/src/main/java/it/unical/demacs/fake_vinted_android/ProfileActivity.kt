@@ -151,8 +151,11 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet ) {
         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
             append("Saldo: ")
         }
+        val saldo1 = saldo.saldo
+        val formato = "%.2f"
+        val risultatoFormattato = String.format(formato, saldo1)
         // Utilizza il saldo del Wallet se non è null, altrimenti mostra "Non disponibile"
-        append(if (saldo != null) "${saldo.saldo} €" else "Non disponibile")
+        append(if (saldo != null) "${risultatoFormattato} €" else "Non disponibile")
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
