@@ -239,8 +239,9 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                 }
             }
         }
-    ) {
-        Column {
+    ) {innerpadding ->
+        Column{
+
             TextField(
                 value = value,
                 onValueChange = { newText ->
@@ -249,6 +250,7 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                     showError.value = false
                     value = newText
                 },
+
                 trailingIcon = {
                     IconButton(onClick = {
                         coroutineScope.launch {
@@ -280,7 +282,7 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(bottom = innerpadding.calculateBottomPadding()),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     items(searchResult) { item ->
@@ -288,11 +290,20 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                             item,
                             navController
                         )
+
                     }
+
                 }
+
+
             }
+
         }
+
+
     }
+
+
 }
 
 

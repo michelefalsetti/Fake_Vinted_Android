@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -91,7 +92,7 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
                 }
             }
         }
-    ) {
+    ) {innerpadding ->
         Column {
             Text(
                 text = "Notifiche",
@@ -106,6 +107,7 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
 
             if (notificationResult.isNotEmpty()) {
                 LazyColumn(
+                    contentPadding = PaddingValues(bottom = innerpadding.calculateBottomPadding()),
                     modifier = Modifier
                         .fillMaxSize()
 
@@ -142,6 +144,7 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
             }
         }
     }
+
 }
 
 

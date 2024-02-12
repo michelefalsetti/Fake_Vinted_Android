@@ -332,6 +332,7 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
     val coroutineScope = rememberCoroutineScope()
     var successDialogVisible by remember { mutableStateOf(false) }
     var insufficientBalanceDialogVisible by remember { mutableStateOf(false) }
+    var purchaseownproduct by remember { mutableStateOf(false) }
 
 
 
@@ -419,7 +420,7 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
 
         Button(
             onClick = {
-                if (wallet.saldo >= prezzoTotale!!) {
+                if (wallet.saldo >= prezzoTotale!! && item.idUtente != userState?.id) {
                     coroutineScope.launch {
                         apiService.buyItem("Bearer $token", item.id, token, prezzoTotale)
 
@@ -430,8 +431,13 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
                         successDialogVisible = true
 
                     }
-                } else {
+                }
+                else {
                     insufficientBalanceDialogVisible = true
+                }
+
+                if( item.idUtente == userState?.id){
+                    purchaseownproduct = true;
                 }
 
 
@@ -462,7 +468,7 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
         }
     }
 
-    if (successDialogVisible) {
+    if (successDialogVisible && !purchaseownproduct) {
         AlertDialog(
             onDismissRequest = {
                 successDialogVisible = false
@@ -486,8 +492,31 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
         )
     }
 
+    if(purchaseownproduct){
+        AlertDialog(
+            onDismissRequest = {},
+            title = {
+                Text(text = "Impossibile acquistare")
+            },
+            text = {
+                Text(text = "Non puoi acquistare i tuoi stessi prodotti!")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        navController.navigate(Routes.FIRSTPAGE.route)
 
-    if (insufficientBalanceDialogVisible) {
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+
+            }
+        )
+    }
+
+
+    if (insufficientBalanceDialogVisible && !purchaseownproduct) {
         AlertDialog(
             onDismissRequest = {
                 insufficientBalanceDialogVisible = false
@@ -510,6 +539,7 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
 
             }
         )
+
     }
 }
 
