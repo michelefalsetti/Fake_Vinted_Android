@@ -68,6 +68,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0") // o una versione più recente
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation ("com.github.bumptech.glide:compose:1.0.0-alpha.1")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
 
 
     testImplementation("junit:junit:4.13.2")
