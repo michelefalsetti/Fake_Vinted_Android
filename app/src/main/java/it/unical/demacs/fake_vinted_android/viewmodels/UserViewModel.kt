@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.net.http.HttpException
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresExtension
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,7 +38,7 @@ class UserViewModel(private val localContext: Context): ViewModel() {
 
     init {
         sessionManager = SessionManager(localContext) // Create an instance of your SessionManager class
-        apiService = RetrofitClient.create(sessionManager)
+        apiService = RetrofitClient.create(sessionManager,localContext)
     }
 
     fun getCurrentUser() {
@@ -50,6 +51,7 @@ class UserViewModel(private val localContext: Context): ViewModel() {
                 if (response.isSuccessful) {
                     // Aggiorna lo stato dell'utente con i dati ricevuti
                     _user.value = response.body()
+                    Log.d("eccolo", _user.value.toString())
                 } else {
                     // Gestisci l'errore, ad esempio aggiornando lo stato dell'utente con un messaggio di errore
                     val errorBody = response.errorBody()?.string()

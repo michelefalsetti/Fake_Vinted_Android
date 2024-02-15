@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val context = LocalContext.current
                 val sessionManager = remember { SessionManager(context) }
-                val apiService = RetrofitClient.create(sessionManager)
+                val apiService = RetrofitClient.create(sessionManager,context)
                 val userViewModel = UserViewModel(context)
                 val userFormViewModel = UserFormViewModel()
                 val itemViewModel = ItemViewModel(context)
@@ -169,7 +169,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
             AddItem(navController,apiService,sessionManager,navController) // La composable per aggiungere un articolo
         }
         composable(Routes.PROFILE.route) {
-            ProfilePage(userViewModel = userViewModel, navController = navController)
+            ProfilePage(userViewModel = userViewModel, navController = navController, apiService = apiService,sessionManager=sessionManager)
         }
         composable(Routes.FIRSTPAGE.route) {
             HomePage(itemViewModel = itemViewModel, navController)
