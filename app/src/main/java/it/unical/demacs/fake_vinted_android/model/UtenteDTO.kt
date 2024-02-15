@@ -9,9 +9,8 @@ data class UtenteDTO(
     var cognome: String,
     var email: String,
     var password: Any? = null,
-    var dataNascita: List<Long>,
     var indirizzo: String,
-    var numeroTelefono: String
+
 ){
     companion object {
         fun validateUsername(username: String): Boolean {
@@ -39,19 +38,11 @@ data class UtenteDTO(
             return false
         }
 
-        fun validatePhoneNumber(phoneNumber: String): Boolean {
-            if (phoneNumber.isNotEmpty() && android.util.Patterns.PHONE.matcher(phoneNumber)
-                    .matches()
-            )
-                return true
-            return false
-        }
 
-        fun validateBirthDate(birthDate: LocalDate): Boolean {
-            if (birthDate.minusYears(LocalDate.now().year.toLong()).year < 13)
-                return true
-            return false
-        }
+
+
+
+
     }
 }
 

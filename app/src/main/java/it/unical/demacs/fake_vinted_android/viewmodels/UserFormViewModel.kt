@@ -12,9 +12,6 @@ data class UserState(
     val lastName: String = "",
     val email: String = "",
     val password: String = "",
-    val birthDate: LocalDate = LocalDate.now(),
-    val phoneNumber: String = "",
-    val profileImageUrl: String = "",
     val passwordConfirm: String = "",
 
     val isUsernameError: Boolean = !User.validateUsername(username = username),
@@ -22,10 +19,7 @@ data class UserState(
     val isLastNameError: Boolean = !User.validateLastName(lastName = lastName),
     val isEmailError: Boolean = !User.validateEmail(email = email),
     val isPasswordError: Boolean = !User.validatePassword(password = password),
-    val isBirthDateError: Boolean = !User.validateBirthDate(birthDate = birthDate),
-    val isPhoneNumberError: Boolean = !User.validatePhoneNumber(phoneNumber = phoneNumber),
 
-    val isPasswordConfirmError: Boolean = passwordConfirm.isEmpty()
 )
 
 class UserFormViewModel {
@@ -76,23 +70,11 @@ class UserFormViewModel {
         val hasError = passwordConfirm.isEmpty() && password != passwordConfirm
         _userState.value = _userState.value.copy(
             passwordConfirm = passwordConfirm,
-            isPasswordConfirmError = hasError
+
         )
     }
 
-    fun updateBirthDate(birthDate: LocalDate) {
-        val hasError = !User.validateBirthDate(birthDate)
-        _userState.value = _userState.value.copy(
-            birthDate = birthDate,
-            isBirthDateError = hasError
-        )
-    }
 
-    fun updatePhoneNumber(phoneNumber: String) {
-        val hasError = !User.validatePhoneNumber(phoneNumber)
-        _userState.value = _userState.value.copy(
-            phoneNumber = phoneNumber,
-            isPhoneNumberError = hasError
-        )
-    }
+
+
 }

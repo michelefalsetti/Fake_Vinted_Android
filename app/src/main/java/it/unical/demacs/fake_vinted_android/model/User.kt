@@ -40,19 +40,7 @@ class User(
             return false
         }
 
-        fun validatePhoneNumber(phoneNumber: String): Boolean {
-            if (phoneNumber.isNotEmpty() && android.util.Patterns.PHONE.matcher(phoneNumber)
-                    .matches()
-            )
-                return true
-            return false
-        }
 
-        fun validateBirthDate(birthDate: LocalDate): Boolean {
-            if (birthDate.minusYears(LocalDate.now().year.toLong()).year < 13)
-                return true
-            return false
-        }
 
         fun validatePassword(password: String): Boolean {
             if (password.isNotEmpty()) {

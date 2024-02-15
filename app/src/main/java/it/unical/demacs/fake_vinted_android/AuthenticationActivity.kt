@@ -31,8 +31,10 @@ import kotlinx.coroutines.launch
 fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHostController, apiService: ApiService) {
     val coroutineScope = rememberCoroutineScope()
     val userState by userFormViewModel.userState.collectAsState()
-    var showNicknameError by remember { mutableStateOf(false) }
+    val nameEmailError by remember { derivedStateOf { userState.isUsernameError || userState.isEmailError } }
+    val passwordError by remember { derivedStateOf { userState.isPasswordError } }
     val showDialog = remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -50,23 +52,31 @@ fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHo
             onValueChange = {userFormViewModel.updateUsername(it)},
             label = { Text("Nickname") },
             singleLine = true,
+            isError = userState.isUsernameError,
         )
-        if (showNicknameError) {
-            Text("Il nickname deve avere almeno 4 caratteri", color = MaterialTheme.colorScheme.error)
-        }
+
 
         OutlinedTextField(
             value = userState.email,
             onValueChange = { userFormViewModel.updateEmail(it) },
             label = { Text(stringResource(R.string.user_email)) },
             singleLine = true,
+            isError = userState.isEmailError,
         )
+        if (nameEmailError) {
+            Text(
+                stringResource(R.string.user_nameemailerror),
+                style = MaterialTheme.typography.headlineSmall,
+
+            )
+        }
 
         OutlinedTextField(
             value = userState.firstName,
             onValueChange = { userFormViewModel.updateFirstName(it) },
             label = { Text(stringResource(R.string.user_firstName)) },
             singleLine = true,
+            isError = userState.isFirstNameError,
 
         )
 
@@ -74,7 +84,9 @@ fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHo
             value = userState.lastName,
             onValueChange = { userFormViewModel.updateLastName(it) },
             label = { Text(stringResource(R.string.user_lastName)) },
-            singleLine = true
+            singleLine = true,
+            isError = userState.isLastNameError,
+
         )
 
         OutlinedTextField(
@@ -85,21 +97,27 @@ fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHo
             label = { Text(stringResource(R.string.user_password)) },
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
+            isError = userState.isPasswordError,
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
         )
         OutlinedTextField(
             value = userState.passwordConfirm,
             onValueChange = {
-                userFormViewModel.updatePasswordConfirm(
-                    it,
-                    userState.password
-                )
+                userFormViewModel.updatePasswordConfirm(it, userState.password)
             },
             label = { Text(stringResource(R.string.user_password_confirm)) },
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
         )
+
+        if (passwordError) {
+            Text(
+                stringResource(R.string.user_passworderror),
+                style = MaterialTheme.typography.titleSmall,
+
+            )
+        }
 
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -116,6 +134,8 @@ fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHo
                     try {
                         showDialog.value= true
                         val response=  apiService.register(username, password, email, nome, cognome)
+
+
                     } catch ( e : Exception){}
                 }
 
