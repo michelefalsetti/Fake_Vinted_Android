@@ -4,14 +4,11 @@ import java.time.LocalDate
 
 data class UtenteDTO(
     var id: Long,
-    var username: String,
     var nome: String,
     var cognome: String,
     var email: String,
     var password: Any? = null,
-    var dataNascita: List<Long>,
-    var indirizzo: String,
-    var numeroTelefono: String
+    var username: String
 ){
     companion object {
         fun validateUsername(username: String): Boolean {
