@@ -28,13 +28,17 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHostController, apiService: ApiService) {
+fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: UserFormViewModel, navHostController: NavHostController, apiService: ApiService) {
     val coroutineScope = rememberCoroutineScope()
     val userState by userFormViewModel.userState.collectAsState()
     val nameEmailError by remember { derivedStateOf { userState.isUsernameError || userState.isEmailError } }
     val passwordError by remember { derivedStateOf { userState.isPasswordError } }
     val showDialog = remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val addressState by addressFormViewModel.addressState.collectAsState()
+
+
+    val commonModifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
 
     Column(
         modifier = Modifier
@@ -89,6 +93,53 @@ fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHo
 
         )
 
+        Row() {
+            OutlinedTextField(
+                value = addressState.street,
+                onValueChange = { addressFormViewModel.updateStreet(it) },
+                label = { Text(stringResource(R.string.user_street)) },
+                isError = addressState.isStreetError,
+                singleLine = true,
+                modifier = commonModifier.weight(0.70f)
+            )
+            OutlinedTextField(
+                value = addressState.streetNumber,
+                onValueChange = { addressFormViewModel.updateStreetNumber(it) },
+                label = { Text(stringResource(R.string.user_streetnumber)) },
+                isError = addressState.isStreetNumberError,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = commonModifier.weight(0.30f),
+            )
+        }
+        Row() {
+            OutlinedTextField(
+                value = addressState.city,
+                onValueChange = { addressFormViewModel.updateCity(it) },
+                label = { Text(stringResource(R.string.user_city)) },
+                singleLine = true,
+                modifier = commonModifier.weight(0.33f)
+            )
+            OutlinedTextField(
+                value = addressState.province,
+                onValueChange = { addressFormViewModel.updateProvince(it) },
+                label = { Text(stringResource(R.string.user_province)) },
+                isError = addressState.isProvinceError,
+                singleLine = true,
+                modifier = commonModifier.weight(0.33f)
+            )
+            OutlinedTextField(
+                value = addressState.zipCode,
+                onValueChange = { addressFormViewModel.updateZipCode(it) },
+                label = { Text(stringResource(R.string.user_zipcode)) },
+                isError = addressState.isZipCodeError,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = commonModifier.weight(0.33f)
+            )
+            //TODO: add country field
+        }
+
         OutlinedTextField(
             value = userState.password,
             onValueChange = {
@@ -129,11 +180,13 @@ fun RegisterPage( userFormViewModel: UserFormViewModel, navHostController: NavHo
                 val email = userState.email
                 val nome = userState.lastName
                 val cognome = userState.firstName
+                val indirizzo = addressState.street+" "+addressState.city+" "+addressState.province+" "+addressState.country
+
 
                 coroutineScope.launch {
                     try {
                         showDialog.value= true
-                        val response=  apiService.register(username, password, email, nome, cognome)
+                        val response=  apiService.register(username, password, email, nome, cognome, indirizzo)
 
 
                     } catch ( e : Exception){}

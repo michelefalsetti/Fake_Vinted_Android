@@ -61,6 +61,7 @@ import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.User
 import it.unical.demacs.fake_vinted_android.ui.theme.Fake_Vinted_AndroidTheme
+import it.unical.demacs.fake_vinted_android.viewmodels.AddressFormViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserFormViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserViewModel
@@ -80,6 +81,7 @@ class MainActivity : ComponentActivity() {
                 val userViewModel = UserViewModel(context)
                 val userFormViewModel = UserFormViewModel()
                 val itemViewModel = ItemViewModel(context)
+                val addressFormViewModel = AddressFormViewModel()
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -92,7 +94,8 @@ class MainActivity : ComponentActivity() {
                         sessionManager = sessionManager,
                         navController = navController,
                         isLogged = isLogged,
-                        itemViewModel = itemViewModel
+                        itemViewModel = itemViewModel,
+                        addressFormViewModel = addressFormViewModel
 
                     )
                 }
@@ -137,7 +140,7 @@ fun MainPage( navController: NavHostController) {
 
 
 @Composable
-fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,userFormVIewModel : UserFormViewModel, apiService: ApiService, sessionManager: SessionManager, navController: NavHostController, isLogged: MutableState<Boolean>) {
+fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,addressFormViewModel: AddressFormViewModel,userFormVIewModel : UserFormViewModel, apiService: ApiService, sessionManager: SessionManager, navController: NavHostController, isLogged: MutableState<Boolean>) {
     LaunchedEffect(key1 = true) {
         itemViewModel.fetchItemsInVendita()
     }
@@ -159,7 +162,8 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
             RegisterPage(
                 userFormViewModel = userFormVIewModel,
                 navHostController = navController,
-                apiService = apiService
+                apiService = apiService,
+                addressFormViewModel = addressFormViewModel,
             )
         }
 

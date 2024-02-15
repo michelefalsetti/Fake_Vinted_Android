@@ -38,6 +38,7 @@ interface ApiService {
         @Field("email") email: String,
         @Field("nome") nome: String,
         @Field("cognome") cognome: String,
+        @Field("indirizzo") indirizzo: String,
     ): Response<String>
 
     @GET("/api/v3/item/{itemId}")

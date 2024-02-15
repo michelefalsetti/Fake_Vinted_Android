@@ -8,5 +8,6 @@ data class Utente(
     var cognome: String? ,
     var email: String? ,
     var password: String? ,
-    var username: String?
+    var username: String?,
+
 )
