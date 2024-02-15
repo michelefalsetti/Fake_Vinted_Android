@@ -169,7 +169,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,us
             AddItem(navController,apiService,sessionManager,navController) // La composable per aggiungere un articolo
         }
         composable(Routes.PROFILE.route) {
-            ProfilePage(userViewModel = userViewModel, navController = navController)
+            ProfilePage(userViewModel = userViewModel, navController = navController, apiService = apiService,sessionManager=sessionManager)
         }
         composable(Routes.FIRSTPAGE.route) {
             HomePage(itemViewModel = itemViewModel, navController)
