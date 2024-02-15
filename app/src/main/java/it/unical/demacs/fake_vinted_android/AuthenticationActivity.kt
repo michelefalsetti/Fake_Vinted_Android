@@ -1,6 +1,7 @@
 package it.unical.demacs.fake_vinted_android
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -186,11 +187,11 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
                 coroutineScope.launch {
                     try {
                         showDialog.value= true
-                        val response=  apiService.register(username, password, email, nome, cognome, indirizzo)
-
+                        val response=  apiService.register(username, password, email, nome, cognome, indirizzo,addressState.street,addressState.streetNumber,addressState.zipCode,addressState.city,addressState.province)
 
                     } catch ( e : Exception){}
                 }
+
 
             },
             modifier = Modifier.fillMaxWidth()

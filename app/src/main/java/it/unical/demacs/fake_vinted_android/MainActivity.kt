@@ -69,6 +69,7 @@ import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -108,6 +109,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainPage( navController: NavHostController) {
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -205,7 +207,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,ad
 
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navController: NavHostController) {
@@ -215,6 +217,9 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
     val showResult = remember { mutableStateOf(false) }
     val showError = remember { mutableStateOf(false) }
     var value by rememberSaveable { mutableStateOf("") }
+
+
+
 
     Scaffold(
         bottomBar = {
