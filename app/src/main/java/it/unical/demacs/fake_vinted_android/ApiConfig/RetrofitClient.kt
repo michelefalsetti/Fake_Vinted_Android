@@ -42,6 +42,7 @@ class RetrofitClient {
             val sslContext = SSLContext.getInstance("TLS")
             sslContext.init(null, trustManagerFactory.trustManagers, SecureRandom())
 
+
             val allHostsValid = HostnameVerifier { _, _ -> true }
 
             val okHttpClient = OkHttpClient.Builder()
