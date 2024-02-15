@@ -37,7 +37,7 @@ class UserViewModel(private val localContext: Context): ViewModel() {
 
     init {
         sessionManager = SessionManager(localContext) // Create an instance of your SessionManager class
-        apiService = RetrofitClient.create(sessionManager)
+        apiService = RetrofitClient.create(sessionManager,localContext)
     }
 
     fun getCurrentUser() {

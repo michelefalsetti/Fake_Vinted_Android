@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val context = LocalContext.current
                 val sessionManager = remember { SessionManager(context) }
-                val apiService = RetrofitClient.create(sessionManager)
+                val apiService = RetrofitClient.create(sessionManager,context)
                 val userViewModel = UserViewModel(context)
                 val userFormViewModel = UserFormViewModel()
                 val itemViewModel = ItemViewModel(context)
