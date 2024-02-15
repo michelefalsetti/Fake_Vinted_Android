@@ -8,9 +8,11 @@ class User(
     val firstName: String,
     val lastName: String,
     val email: String,
+    val password: String,
     val birthDate: LocalDate,
     val address: String,
     val phoneNumber: String,
+
 
 ) {
 
@@ -43,14 +45,8 @@ class User(
 
 
         fun validatePassword(password: String): Boolean {
-            if (password.isNotEmpty()) {
-                if (password.contains(Regex("[a-z]")) and password.contains(Regex("[A-Z]")) and password.contains(
-                        Regex("[0-9]")
-                    )
-                ) {
-                    return true
-                }
-            }
+            if (password.isNotEmpty())
+                return true
             return false
         }
 

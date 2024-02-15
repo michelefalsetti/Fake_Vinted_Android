@@ -36,6 +36,8 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
     val showDialog = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val addressState by addressFormViewModel.addressState.collectAsState()
+    val errorMessage = remember { mutableStateOf("") }
+
 
 
     val commonModifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
@@ -67,13 +69,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             singleLine = true,
             isError = userState.isEmailError,
         )
-        if (nameEmailError) {
-            Text(
-                stringResource(R.string.user_nameemailerror),
-                style = MaterialTheme.typography.headlineSmall,
 
-            )
-        }
 
         OutlinedTextField(
             value = userState.firstName,
@@ -183,13 +179,26 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
                 val indirizzo = addressState.street+" "+addressState.city+" "+addressState.province+" "+addressState.country
 
 
+
                 coroutineScope.launch {
                     try {
-                        showDialog.value= true
+
                         val response=  apiService.register(username, password, email, nome, cognome, indirizzo)
 
+                        if(response.isSuccessful && !nameEmailError && !passwordError){
 
-                    } catch ( e : Exception){}
+                            showDialog.value = true
+                            errorMessage.value = ""
+                        } else{
+                            showDialog.value = false
+                            errorMessage.value = "Errore durante la registrazione"
+
+                        }
+
+                    } catch ( e : Exception){
+                        showDialog.value = false
+                        errorMessage.value = "Errore di connessione o del server"
+                    }
                 }
 
             },
@@ -197,6 +206,19 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
         ) {
             Text("Registrati")
         }
+        if (errorMessage.value.isNotEmpty()) {
+            Snackbar(
+                action = {
+                    Button(onClick = { errorMessage.value = "" }) {
+                        Text("CHIUDI")
+                    }
+                },
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(text = errorMessage.value)
+            }
+        }
+
         if (showDialog.value) {
             AlertDialog(
                 onDismissRequest = {
