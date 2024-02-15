@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -98,13 +99,7 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.icon), // Assicurati che l'icona sia presente nelle tue risorse
-                    contentDescription = "icona",
-                    modifier = Modifier
-                        .size(150.dp)
-                        .background(Color.Transparent)
-                )
+
 
                 Spacer(modifier = Modifier.height(90.dp))
 
@@ -158,35 +153,62 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet ) {
         append(if (saldo != null) "${risultatoFormattato} €" else "Non disponibile")
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(5.dp)) {
 
-        Text(
-            text = saldoText,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = 18.dp)
-        )
 
-        Text(
-            text = usernameText,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(vertical = 4.dp)
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(id = R.drawable.icon), // Assicurati che l'icona sia presente nelle tue risorse
+                contentDescription = "icona",
+                modifier = Modifier
+                    .size(150.dp)
+                    .background(Color.Transparent)
+
+            )
+            Spacer(Modifier.width(8.dp))
+
+            Column {
+
+
+                Text(
+                text = usernameText,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(vertical = 10.dp)
+            )
+
+                Text(
+                text = saldoText,
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(vertical = 10.dp)
+            )}
+
+
+        }
+
+
+        Spacer(modifier = Modifier.height(20.dp)) // Regola questo valore per modificare lo spazio verticale
+
+
 
         Text(
             text = nomeText,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(vertical = 4.dp)
         )
+
+        Spacer(modifier = Modifier.height(15.dp))
 
         Text(
             text = cognomeText,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(vertical = 4.dp)
         )
 
+        Spacer(modifier = Modifier.height(15.dp))
+
         Text(
             text = emailText,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(vertical = 4.dp)
         )
 
