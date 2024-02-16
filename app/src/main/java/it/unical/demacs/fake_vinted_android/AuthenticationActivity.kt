@@ -185,11 +185,14 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
 
 
                 coroutineScope.launch {
-                    try {
-                        showDialog.value= true
-                        val response=  apiService.register(username, password, email, nome, cognome, indirizzo,addressState.street,addressState.streetNumber,addressState.zipCode,addressState.city,addressState.province)
 
-                    } catch ( e : Exception){}
+                        val response=  apiService.register(username, password, email, nome, cognome, indirizzo,addressState.street,addressState.streetNumber,addressState.zipCode,addressState.city,addressState.province)
+                        if(response.isSuccessful){
+                            Log.d("indirizzo", response.body().toString())
+                            showDialog.value= true
+                        }
+
+
                 }
 
 
