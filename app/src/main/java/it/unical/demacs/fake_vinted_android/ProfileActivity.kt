@@ -22,9 +22,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -58,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -70,6 +73,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
+import it.unical.demacs.fake_vinted_android.model.Address
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
@@ -144,13 +148,46 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
     val token = sessionManager.getToken()
     val itemsAcquistati= remember { mutableListOf<Item>() }
     val showResult = remember { mutableStateOf(false) }
+    var indirizzoText by remember { mutableStateOf<AnnotatedString?>(null) }
+
 
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(key1 = true) {
         coroutineScope.launch {
             if (token != null) {
                 val res = apiService.getItemAcquistati("Bearer $token", token)
-                if (res.isSuccessful) {
+                val indirizzo= apiService.getIndirizzo("Bearer $token", token)
+                if (res.isSuccessful && indirizzo.isSuccessful) {
+
+                    val via = indirizzo.body()?.via ?: ""
+                    val numerocivico = indirizzo.body()?.numerocivico ?: ""
+                    val cap = indirizzo.body()?.cap ?: ""
+                    val citta = indirizzo.body()?.citta ?: ""
+                    val provincia = indirizzo.body()?.provincia ?: ""
+
+                    val indirizzoCompleto = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Nome e Cognome: ")
+                        }
+                        append("${user.nome} ${user.cognome}\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Via e Numero Civico: ")
+                        }
+                        append("$via, $numerocivico\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("CAP: ")
+                        }
+                        append("$cap\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Città e Provincia: ")
+                        }
+                        append("$citta, $provincia")
+                    }
+
+                    indirizzoText = indirizzoCompleto
                     for (item in res.body()!!) {
                         Log.d("oggetti", item.toString())
                         itemsAcquistati.add(item)
@@ -189,6 +226,9 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
         }
         append(user.email)
     }
+
+
+
     val saldoText = buildAnnotatedString {
         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
             append("Saldo: ")
@@ -200,7 +240,9 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
         append(if (saldo != null) "${risultatoFormattato} €" else "Non disponibile")
     }
 
-    Column(modifier = Modifier.padding(5.dp)) {
+    Column(modifier = Modifier
+        .verticalScroll(rememberScrollState())
+        .padding(5.dp)) {
         Card {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -277,8 +319,37 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
                         .fillMaxWidth()
                 )
 
+                Spacer(modifier = Modifier.height(15.dp))
+
+
             }
         }
+    }
+    IndirizzoButton {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+
+                indirizzoText?.let { it1 ->
+                    Text(
+                        text = it1,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .padding(vertical = 4.dp)
+                            .fillMaxWidth()
+                    )
+                }
+
+            }
+        }
+
     }
     StoricoOrdiniButton {
 
@@ -307,6 +378,8 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
             }
         }
     }
+
+
 }
 
 
@@ -348,6 +421,24 @@ fun StoricoOrdiniButton(content: @Composable (isEspanso: Boolean) -> Unit) {
 }
 
 @Composable
+fun IndirizzoButton(content: @Composable (isEspanso: Boolean) -> Unit) {
+    var isEspanso by remember { mutableStateOf(false) }
+
+    Column {
+        Button(onClick = { isEspanso = !isEspanso },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)) {
+            Text(if (isEspanso) "Indirizzo ⌄" else "Indirizzo >")
+        }
+
+        if (isEspanso) {
+            content(isEspanso)
+        }
+    }
+}
+
+@Composable
 fun ItemInVenditaPreview(item: Item, navController: NavController) {
     Card(
         modifier = Modifier
@@ -372,11 +463,10 @@ fun ItemInVenditaPreview(item: Item, navController: NavController) {
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp)) // Aggiunge uno spazio tra l'immagine e il testo
-
+            Spacer(modifier = Modifier.width(16.dp))
             Column(
                 modifier = Modifier
-                    .weight(1f) // Fai espandere la colonna per riempire lo spazio disponibile
+                    .weight(1f)
                     .fillMaxHeight()
             ) {
                 Text(item.nome, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))

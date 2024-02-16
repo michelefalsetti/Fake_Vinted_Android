@@ -102,16 +102,10 @@ interface ApiService {
         @Field("messaggio") messaggio: String
     ): Response<Notifications>
 
-    @FormUrlEncoded
-    @POST("/api/v2/addAddress")
-    suspend fun setAddress(
-                            @Field("username") username: String,
-                            @Field("via") via:String,
-                            @Field("numerocivico")numerocivico:String,
-                            @Field("cap") cap: String,
-                            @Field("citta")citta: String,
-                            @Field("provincia")provincia: String
-    ): Response<Address>
+    @GET("/api/v2/getAddress/{token}")
+    suspend fun getIndirizzo(@Header("Authorization") token:String?, @Path("token") token_: String?): Response<Address>
+
+
 
 
 
