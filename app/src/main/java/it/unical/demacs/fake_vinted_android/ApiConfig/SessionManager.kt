@@ -10,6 +10,8 @@ class SessionManager(context: Context) {
         context.getSharedPreferences("SessionManager", Context.MODE_PRIVATE)
     private val editor: SharedPreferences.Editor = sharedPreferences.edit()
 
+    private val secretKey=  "23778sah9021-12123-12s-as-12a-AS_12xoiJN-SHWQ98";
+
     fun saveUsername(username : String) {
         editor.putString("Username", username)
         editor.apply()
