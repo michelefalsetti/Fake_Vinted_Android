@@ -1,6 +1,7 @@
 package it.unical.demacs.fake_vinted_android
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -69,7 +70,13 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             singleLine = true,
             isError = userState.isEmailError,
         )
+        if (nameEmailError) {
+            Text(
+                stringResource(R.string.user_nameemailerror),
+                style = MaterialTheme.typography.headlineSmall,
 
+            )
+        }
 
         OutlinedTextField(
             value = userState.firstName,
@@ -113,7 +120,6 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
                 value = addressState.city,
                 onValueChange = { addressFormViewModel.updateCity(it) },
                 label = { Text(stringResource(R.string.user_city)) },
-                isError = addressState.isCityError,
                 singleLine = true,
                 modifier = commonModifier.weight(0.33f)
             )
@@ -159,7 +165,13 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
         )
 
+        if (passwordError) {
+            Text(
+                stringResource(R.string.user_passworderror),
+                style = MaterialTheme.typography.titleSmall,
 
+            )
+        }
 
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -177,6 +189,10 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
 
                 coroutineScope.launch {
                     try {
+                        showDialog.value= true
+                        val response=  apiService.register(username, password, email, nome, cognome, indirizzo,addressState.street,addressState.streetNumber,addressState.zipCode,addressState.city,addressState.province)
+
+                    } catch ( e : Exception){}
                         if (!nameEmailError && !passwordError && !addressError) {
                             val response = apiService.register(username, password, email, nome, cognome, indirizzo)
 

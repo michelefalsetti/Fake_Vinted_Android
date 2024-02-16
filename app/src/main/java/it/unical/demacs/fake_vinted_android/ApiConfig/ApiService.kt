@@ -1,4 +1,5 @@
 package it.unical.demacs.fake_vinted_android.ApiConfig
+import it.unical.demacs.fake_vinted_android.model.Address
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.Notifications
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
@@ -39,6 +40,11 @@ interface ApiService {
         @Field("nome") nome: String,
         @Field("cognome") cognome: String,
         @Field("indirizzo") indirizzo: String,
+        @Field("via") via:String,
+        @Field("numerocivico")numerocivico:String,
+        @Field("cap") cap: String,
+        @Field("citta")citta: String,
+        @Field("provincia")provincia: String
     ): Response<String>
 
     @GET("/api/v3/item/{itemId}")
@@ -95,6 +101,10 @@ interface ApiService {
         @Field("idUtente") idUtente: Long,
         @Field("messaggio") messaggio: String
     ): Response<Notifications>
+
+    @GET("/api/v2/getAddress/{token}")
+    suspend fun getIndirizzo(@Header("Authorization") token:String?, @Path("token") token_: String?): Response<Address>
+
 
 
 

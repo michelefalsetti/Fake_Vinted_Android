@@ -100,7 +100,6 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUri = uri
-        // Ottieni il percorso dell'immagine dalla URI
         val imageInputStream = context.contentResolver.openInputStream(uri!!)
         val imageByteArray = imageInputStream?.readBytes()
 
