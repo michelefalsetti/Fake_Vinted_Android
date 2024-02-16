@@ -133,7 +133,7 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                saldoState?.let { DisplayUserInfo(user = user, saldo = it,apiService,sessionManager,navController) }
+                saldoState?.let { DisplayUserInfo(user = user, saldo = it,apiService,sessionManager) }
             }
         }
     }
@@ -144,9 +144,9 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @Composable
-fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sessionManager: SessionManager,navController: NavController) {
+fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sessionManager: SessionManager) {
     val token = sessionManager.getToken()
-    val itemsAcquistati= remember { mutableListOf<Item>() }
+    val itemsAcquistati = remember { mutableListOf<Item>() }
     val showResult = remember { mutableStateOf(false) }
     var indirizzoText by remember { mutableStateOf<AnnotatedString?>(null) }
 
@@ -156,7 +156,7 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
         coroutineScope.launch {
             if (token != null) {
                 val res = apiService.getItemAcquistati("Bearer $token", token)
-                val indirizzo= apiService.getIndirizzo("Bearer $token", token)
+                val indirizzo = apiService.getIndirizzo("Bearer $token", token)
                 if (res.isSuccessful && indirizzo.isSuccessful) {
 
                     val via = indirizzo.body()?.via ?: ""
@@ -228,7 +228,6 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
     }
 
 
-
     val saldoText = buildAnnotatedString {
         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
             append("Saldo: ")
@@ -240,9 +239,11 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
         append(if (saldo != null) "${risultatoFormattato} €" else "Non disponibile")
     }
 
-    Column(modifier = Modifier
-        .verticalScroll(rememberScrollState())
-        .padding(5.dp)) {
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(5.dp)
+    ) {
         Card {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -277,169 +278,156 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
         }
     }
 
-        Spacer(modifier = Modifier.height(20.dp)) // Regola questo valore per modificare lo spazio verticale
+    Spacer(modifier = Modifier.height(20.dp)) // Regola questo valore per modificare lo spazio verticale
 
+    var datiEspanso by remember { mutableStateOf(false) }
+    var indirizzoEspanso by remember { mutableStateOf(false) }
+    var storicoEspanso by remember { mutableStateOf(false) }
 
-    DatiButton {
-        Card(
+    Column {
+        Button(
+            onClick = { datiEspanso = !datiEspanso
+                storicoEspanso = false
+                indirizzoEspanso = false},
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = nomeText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .padding(vertical = 4.dp)
-                        .fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Text(
-                    text = cognomeText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .padding(vertical = 4.dp)
-                        .fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Text(
-                    text = emailText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .padding(vertical = 4.dp)
-                        .fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-
-            }
+            Text(if (datiEspanso) "Dati Personali ⌄" else "Dati Personali >")
         }
-    }
-    IndirizzoButton {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Column(
+
+        if (datiEspanso) {
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(8.dp)
             ) {
-
-                indirizzoText?.let { it1 ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
                     Text(
-                        text = it1,
+                        text = nomeText,
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier
                             .padding(vertical = 4.dp)
                             .fillMaxWidth()
                     )
-                }
 
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    Text(
+                        text = cognomeText,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .padding(vertical = 4.dp)
+                            .fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    Text(
+                        text = emailText,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .padding(vertical = 4.dp)
+                            .fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
+
+                }
             }
         }
-
     }
-    StoricoOrdiniButton {
 
-        if (showResult.value) {
-            if (itemsAcquistati.isNotEmpty()) {
-                LazyColumn(
+        Column {
+            Button(onClick = { indirizzoEspanso = !indirizzoEspanso
+                datiEspanso = false
+                storicoEspanso = false},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)) {
+                Text(if (indirizzoEspanso) "Indirizzo ⌄" else "Indirizzo >")
+            }
+
+            if (indirizzoEspanso) {
+                Card(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                        .fillMaxWidth()
+                        .padding(8.dp)
                 ) {
-                    items(itemsAcquistati) { item ->
-                        ItemInVenditaPreview(
-                            item,
-                            navController
-                        )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+
+                        indirizzoText?.let { it1 ->
+                            Text(
+                                text = it1,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier
+                                    .padding(vertical = 4.dp)
+                                    .fillMaxWidth()
+                            )
+                        }
+
                     }
                 }
-            } else {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Text("Nessun ordine effettuato!")
+            }
+        }
+
+
+
+        Column {
+            Button(onClick = { storicoEspanso = !storicoEspanso
+                datiEspanso = false
+                indirizzoEspanso = false},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)) {
+                Text(if (storicoEspanso) "Storico Ordini⌄" else "Storico Ordini >")
+            }
+
+            if (storicoEspanso) {
+                if (showResult.value) {
+                    if (itemsAcquistati.isNotEmpty()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            items(itemsAcquistati) { item ->
+                                ItemAcquistatiPreview(
+                                    item
+                                )
+                            }
+                        }
+                    } else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text("Nessun ordine effettuato!")
+                        }
+                    }
                 }
             }
         }
-    }
+
 
 
 }
 
 
 
-@Composable
-fun DatiButton(content: @Composable (isEspanso: Boolean) -> Unit) {
-    var isEspanso by remember { mutableStateOf(false) }
-
-    Column {
-        Button(onClick = { isEspanso = !isEspanso },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)) {
-            Text(if (isEspanso) "Dati Personali ⌄" else "Dati Personali >")
-        }
-
-        if (isEspanso) {
-            content(isEspanso)
-        }
-    }
-}
 
 @Composable
-fun StoricoOrdiniButton(content: @Composable (isEspanso: Boolean) -> Unit) {
-    var isEspanso by remember { mutableStateOf(false) }
-
-    Column {
-        Button(onClick = { isEspanso = !isEspanso },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)) {
-            Text(if (isEspanso) "Storico Ordini⌄" else "Storico Ordini >")
-        }
-
-        if (isEspanso) {
-            content(isEspanso)
-        }
-    }
-}
-
-@Composable
-fun IndirizzoButton(content: @Composable (isEspanso: Boolean) -> Unit) {
-    var isEspanso by remember { mutableStateOf(false) }
-
-    Column {
-        Button(onClick = { isEspanso = !isEspanso },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)) {
-            Text(if (isEspanso) "Indirizzo ⌄" else "Indirizzo >")
-        }
-
-        if (isEspanso) {
-            content(isEspanso)
-        }
-    }
-}
-
-@Composable
-fun ItemInVenditaPreview(item: Item, navController: NavController) {
+fun ItemAcquistatiPreview(item: Item) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -483,8 +471,6 @@ fun ItemInVenditaPreview(item: Item, navController: NavController) {
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
-
-                // Aggiungi altre informazioni sull'articolo se necessario
             }
         }
     }
