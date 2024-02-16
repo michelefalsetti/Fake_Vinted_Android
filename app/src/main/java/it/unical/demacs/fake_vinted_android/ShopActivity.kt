@@ -453,19 +453,6 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
                 )
             )
         }
-        Button(
-            onClick = { /* Implementa l'azione al click */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                "Paga con PayPal",
-                style = MaterialTheme.typography.titleMedium.copy( // Usa h5 come esempio per aumentare la dimensione, adattalo secondo necessità
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
     }
 
     if (successDialogVisible && !purchaseownproduct) {
