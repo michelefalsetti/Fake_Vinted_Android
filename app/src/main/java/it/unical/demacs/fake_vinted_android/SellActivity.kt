@@ -98,15 +98,20 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
         .fillMaxWidth()
         .padding(horizontal = 20.dp, vertical = 5.dp) // Riduci il padding verticale
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUri = uri
-        val imageInputStream = context.contentResolver.openInputStream(uri!!)
-        val imageByteArray = imageInputStream?.readBytes()
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            imageUri = uri
+            val imageInputStream = context.contentResolver.openInputStream(uri!!)
+            val imageByteArray = imageInputStream?.readBytes()
 
-        if (imageByteArray != null) {
-            base64Image.value = Base64.encodeToString(imageByteArray, Base64.DEFAULT)
+            if (imageByteArray != null) {
+                base64Image.value = Base64.encodeToString(imageByteArray, Base64.DEFAULT)
+            }
         }
-    }
+
+    var successDialogVisible by remember { mutableStateOf(false) }
+    var failureDialogVisible by remember { mutableStateOf(false) }
+    var emptyFieldsDialogVisible by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -214,7 +219,13 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                 }
 
                 val ConditionOptions =
-                    listOf("Nuovo con cartellino", "Nuovo senza cartellino", "Ottime", "Buone", "Discrete")
+                    listOf(
+                        "Nuovo con cartellino",
+                        "Nuovo senza cartellino",
+                        "Ottime",
+                        "Buone",
+                        "Discrete"
+                    )
                 var expanded1 by remember { mutableStateOf(false) }
                 var selectedOptionText1 by remember { mutableStateOf("") }
 
@@ -265,27 +276,37 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                         .padding(vertical = 8.dp)
                         .height(IntrinsicSize.Max),
                     onClick = {
-                        val nome = nameState.value
-                        val descrizione = descriptionState.value
-                        val price = priceState.value.toBigDecimal()
-                        val categoria = selectedOptionText
-                        val condizioni = selectedOptionText1
-                        coroutineScope.launch {
-                            try {
-                                showDialog.value = true
-                                val response = apiService.addItem(
-                                    "Bearer $token",
-                                    token,
-                                    nome,
-                                    descrizione,
-                                    price,
-                                    base64Image.value ?: "",
-                                    categoria,
-                                    condizioni
-                                )
-                            } catch (e: Exception) {
+                        if (nameState.value.isNotEmpty() && descriptionState.value.isNotEmpty() && priceState.value.isNotEmpty() && !base64Image.value.isNullOrEmpty()) {
+                            val nome = nameState.value
+                            val descrizione = descriptionState.value
+                            val price = priceState.value.toBigDecimal()
+                            val categoria = selectedOptionText
+                            val condizioni = selectedOptionText1
+                            coroutineScope.launch {
+                                try {
+                                    showDialog.value = true
+                                    val response = apiService.addItem(
+                                        "Bearer $token",
+                                        token,
+                                        nome,
+                                        descrizione,
+                                        price,
+                                        base64Image.value ?: "",
+                                        categoria,
+                                        condizioni
+                                    )
 
+                                    if (response.isSuccessful) {
+                                        successDialogVisible = true
+                                    } else {
+                                        failureDialogVisible = true
+                                    }
+                                } catch (e: Exception) {
+                                    failureDialogVisible = true
+                                }
                             }
+                        } else {
+                            emptyFieldsDialogVisible = true
                         }
                     }
                 ) {
@@ -296,7 +317,74 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
             }
         }
     }
+
+    // Aggiungi i dialoghi di successo, insuccesso e campi vuoti
+    if (successDialogVisible) {
+        AlertDialog(
+            onDismissRequest = { successDialogVisible = false },
+            title = {
+                Text(text = "Articolo Aggiunto")
+            },
+            text = {
+                Text(text = "L'articolo è stato aggiunto con successo!")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        successDialogVisible = false
+                        navController.navigate(Routes.FIRSTPAGE.route)
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            })
+    }
+
+    if (failureDialogVisible) {
+        AlertDialog(
+            onDismissRequest = { failureDialogVisible = false },
+            title = {
+                Text(text = "Articolo non aggiunto")
+            },
+            text = {
+                Text(text = "L'articolo non è stato aggiunto!")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        failureDialogVisible = false
+                        navController.navigate(Routes.FIRSTPAGE.route)
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            })
+    }
+
+
+
+    if (emptyFieldsDialogVisible) {
+        AlertDialog(
+
+            onDismissRequest = { emptyFieldsDialogVisible = false },
+            title = {
+                Text(text = "Campi vuoti")
+            },
+            text = {
+                Text(text = "I campi non possono essere vuoti!")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        emptyFieldsDialogVisible = false
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            })
+    }
 }
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)

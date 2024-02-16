@@ -73,7 +73,7 @@ interface ApiService {
         @Field("immagine") immagine: String?,
         @Field("categoria") categoria : String,
         @Field("condizioni") condizioni : String
-    ): Response<String>
+    ): Response<Item>
 
     @FormUrlEncoded
     @POST("/api/v1/newPassword")
