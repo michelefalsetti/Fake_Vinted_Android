@@ -188,29 +188,14 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
 
 
                 coroutineScope.launch {
-                    try {
-                        showDialog.value= true
+
                         val response=  apiService.register(username, password, email, nome, cognome, indirizzo,addressState.street,addressState.streetNumber,addressState.zipCode,addressState.city,addressState.province)
-
-                    } catch ( e : Exception){}
-                        if (!nameEmailError && !passwordError && !addressError) {
-                            val response = apiService.register(username, password, email, nome, cognome, indirizzo)
-
-                            if (response.isSuccessful) {
-                                showDialog.value = true
-                                errorMessage.value = ""
-                            } else {
-                                showDialog.value = false
-                                errorMessage.value = "Registrazione fallita. Per favore, riprova."
-                            }
-                        } else {
-                            showDialog.value = false
-                            errorMessage.value = "Per favore, correggi gli errori nel form prima di procedere."
+                        if(response.isSuccessful){
+                            Log.d("indirizzo", response.body().toString())
+                            showDialog.value= true
                         }
-                    } catch (e: Exception) {
-                        showDialog.value = false
-                        errorMessage.value = "Errore di connessione o del server. Per favore, riprova."
-                    }
+
+
                 }
 
             },

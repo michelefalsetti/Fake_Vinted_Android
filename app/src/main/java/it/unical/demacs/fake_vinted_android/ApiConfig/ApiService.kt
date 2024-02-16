@@ -2,6 +2,8 @@ package it.unical.demacs.fake_vinted_android.ApiConfig
 import it.unical.demacs.fake_vinted_android.model.Address
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.Notifications
+import it.unical.demacs.fake_vinted_android.model.User
+import it.unical.demacs.fake_vinted_android.model.Utente
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
 import retrofit2.http.GET
@@ -45,7 +47,7 @@ interface ApiService {
         @Field("cap") cap: String,
         @Field("citta")citta: String,
         @Field("provincia")provincia: String
-    ): Response<String>
+    ): Response<Utente>
 
     @GET("/api/v3/item/{itemId}")
     suspend fun getItem(@Header("Authorization") token:String?, @Path("itemId") itemId: Long): Response<Item>
@@ -73,7 +75,7 @@ interface ApiService {
         @Field("immagine") immagine: String?,
         @Field("categoria") categoria : String,
         @Field("condizioni") condizioni : String
-    ): Response<String>
+    ): Response<Item>
 
     @FormUrlEncoded
     @POST("/api/v1/newPassword")
