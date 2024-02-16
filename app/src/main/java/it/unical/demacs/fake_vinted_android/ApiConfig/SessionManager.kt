@@ -54,6 +54,17 @@ class SessionManager(context: Context) {
         editor.remove("Bearer")
         editor.apply()
     }
+    fun logout() {
+        clearUsername()
+        clearId()
+        clearToken()
+    }
+
+    fun clearId() {
+        editor.remove("Id")
+        editor.apply()
+    }
+
 
     fun isLoggedIn(): Boolean {
         return sharedPreferences.contains("Bearer")

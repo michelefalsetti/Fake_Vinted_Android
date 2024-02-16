@@ -37,7 +37,6 @@
     <string name="search_button_icon">Search button icon</string>
     <string name="search_button_text">Search</string>
     <string name="welcome_title">Welcome to Vinteddu</string>
-    <string name="welcome_subtitle">"The 2nd best app to buy and sell used products "</string>
     <string name="search">Search product</string>
     <string name="search_bar_placeholder">Search your product here.</string>
     <string name="search_bar_icon">Search Bar icon</string>
@@ -54,10 +53,6 @@
     <string name="wallet">Wallet</string>
     <string name="profile_page">Profile page</string>
     <string name="user_shippingAddress">Shipping Address</string>
-    <string name="balance">Balance</string>
-    <string name="balance_recharge">Insert your recharge amount</string>
-    <string name="balance_recharge_button_prompt">Recharge Wallet</string>
-    <string name="balance_recharge_ok">Wallet recharged</string>
     <string name="item_title">Titolo</string>
     <string name="item_description">Descrizione del prodotto</string>
     <string name="item_price">Prezzo</string>

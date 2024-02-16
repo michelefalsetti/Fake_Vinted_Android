@@ -133,7 +133,7 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                saldoState?.let { DisplayUserInfo(user = user, saldo = it,apiService,sessionManager) }
+                saldoState?.let { DisplayUserInfo(user = user, saldo = it,apiService,sessionManager, navController = navController) }
             }
         }
     }
@@ -144,7 +144,7 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @Composable
-fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sessionManager: SessionManager) {
+fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sessionManager: SessionManager, navController: NavController) {
     val token = sessionManager.getToken()
     val itemsAcquistati = remember { mutableListOf<Item>() }
     val showResult = remember { mutableStateOf(false) }
@@ -418,9 +418,12 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
                 }
             }
         }
+    Spacer(modifier = Modifier.padding(120.dp))
+    Button(onClick = { sessionManager.logout()
+        navController.navigate(Routes.HOME.route)}) {
+        Text( "Effettua il logout")
 
-
-
+    }
 }
 
 
@@ -473,5 +476,6 @@ fun ItemAcquistatiPreview(item: Item) {
                 )
             }
         }
+
     }
 }
