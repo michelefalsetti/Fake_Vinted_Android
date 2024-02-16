@@ -328,7 +328,8 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
     val userState by userViewModel.user.collectAsState()
     val prezzoProdotto = item.prezzo // Prezzo del prodotto
     val costoSpedizione = 2.99 // Costo di spedizione fisso
-    val prezzoTotale = prezzoProdotto?.plus(costoSpedizione)
+    val prezzoTotale = prezzoProdotto?.plus(costoSpedizione) ?: 0.0
+    val prezzoFormattato = String.format("%.2f", prezzoTotale)
     val coroutineScope = rememberCoroutineScope()
     var successDialogVisible by remember { mutableStateOf(false) }
     var insufficientBalanceDialogVisible by remember { mutableStateOf(false) }
@@ -404,7 +405,7 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                 append("Prezzo totale: ")
             }
-            append("${prezzoTotale}€")
+            append("${prezzoFormattato}€")
         }
 
         Text(

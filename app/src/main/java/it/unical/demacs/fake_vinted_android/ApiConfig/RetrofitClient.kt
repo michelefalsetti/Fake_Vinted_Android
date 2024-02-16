@@ -4,6 +4,7 @@ package it.unical.demacs.fake_vinted_android.ApiConfig
 import android.content.Context
 import it.unical.demacs.fake_vinted_android.R
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.InputStream
@@ -18,12 +19,13 @@ import javax.net.ssl.X509TrustManager
 
 class RetrofitClient {
     companion object {
-
-        private const val BASE_URL = "https://192.168.1.4:8081/" //cambiare il proprio ip e porta
+        private const val BASE_URL = "https://192.168.1.9:8080/" // Cambia con il tuo IP e porta
 
         fun create(sessionManager: SessionManager, context: Context): ApiService {
             val interceptor = AuthInterceptor(sessionManager)
 
+            val loggingInterceptor = HttpLoggingInterceptor()
+            loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
 
             val certificateResourceId = R.raw.certificate
 
@@ -44,7 +46,7 @@ class RetrofitClient {
             val allHostsValid = HostnameVerifier { _, _ -> true }
 
             val okHttpClient = OkHttpClient.Builder()
-
+                .addInterceptor(loggingInterceptor)
                 .addInterceptor(interceptor)
                 .sslSocketFactory(sslContext.socketFactory, trustManagerFactory.trustManagers[0] as X509TrustManager)
                 .hostnameVerifier(allHostsValid)
