@@ -173,8 +173,8 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
                 val username = userState.username
                 val password = userState.password
                 val email = userState.email
-                val nome = userState.lastName
-                val cognome = userState.firstName
+                val nome = userState.firstName
+                val cognome = userState.lastName
                 val indirizzo = addressState.street+" "+addressState.city+" "+addressState.province+" "+addressState.country
 
 
