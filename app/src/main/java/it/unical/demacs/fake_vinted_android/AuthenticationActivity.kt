@@ -36,9 +36,8 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
     val passwordError by remember { derivedStateOf { userState.isPasswordError || userState.isPasswordConfirmError} }
     val showDialog = remember { mutableStateOf(false) }
     val addressState by addressFormViewModel.addressState.collectAsState()
-    val addressError by remember { derivedStateOf { addressState.isCountryError || addressState.isCityError || addressState.isZipCodeError || addressState.isProvinceError || addressState.isStreetError || addressState.isStreetNumberError} }
     val errorMessage = remember { mutableStateOf("") }
-
+    val context = LocalContext.current
 
 
     val commonModifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
@@ -57,7 +56,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
         OutlinedTextField(
             value = userState.username,
             onValueChange = {userFormViewModel.updateUsername(it)},
-            label = { Text("Nickname") },
+            label = { Text("Username") },
             singleLine = true,
             isError = userState.isUsernameError,
         )
@@ -70,18 +69,12 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             singleLine = true,
             isError = userState.isEmailError,
         )
-        if (nameEmailError) {
-            Text(
-                stringResource(R.string.user_nameemailerror),
-                style = MaterialTheme.typography.headlineSmall,
 
-            )
-        }
 
         OutlinedTextField(
             value = userState.firstName,
             onValueChange = { userFormViewModel.updateFirstName(it) },
-            label = { Text(stringResource(R.string.user_firstName)) },
+            label = { Text("Nome") },
             singleLine = true,
             isError = userState.isFirstNameError,
 
@@ -90,7 +83,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
         OutlinedTextField(
             value = userState.lastName,
             onValueChange = { userFormViewModel.updateLastName(it) },
-            label = { Text(stringResource(R.string.user_lastName)) },
+            label = { Text("Cognome") },
             singleLine = true,
             isError = userState.isLastNameError,
 
@@ -100,7 +93,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             OutlinedTextField(
                 value = addressState.street,
                 onValueChange = { addressFormViewModel.updateStreet(it) },
-                label = { Text(stringResource(R.string.user_street)) },
+                label = { Text("Via") },
                 isError = addressState.isStreetError,
                 singleLine = true,
                 modifier = commonModifier.weight(0.70f)
@@ -108,7 +101,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             OutlinedTextField(
                 value = addressState.streetNumber,
                 onValueChange = { addressFormViewModel.updateStreetNumber(it) },
-                label = { Text(stringResource(R.string.user_streetnumber)) },
+                label = { Text("N.civico") },
                 isError = addressState.isStreetNumberError,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
@@ -119,14 +112,15 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             OutlinedTextField(
                 value = addressState.city,
                 onValueChange = { addressFormViewModel.updateCity(it) },
-                label = { Text(stringResource(R.string.user_city)) },
+                label = { Text("Città") },
                 singleLine = true,
+                isError = addressState.isCityError,
                 modifier = commonModifier.weight(0.33f)
             )
             OutlinedTextField(
                 value = addressState.province,
                 onValueChange = { addressFormViewModel.updateProvince(it) },
-                label = { Text(stringResource(R.string.user_province)) },
+                label = { Text("Provincia") },
                 isError = addressState.isProvinceError,
                 singleLine = true,
                 modifier = commonModifier.weight(0.33f)
@@ -134,7 +128,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             OutlinedTextField(
                 value = addressState.zipCode,
                 onValueChange = { addressFormViewModel.updateZipCode(it) },
-                label = { Text(stringResource(R.string.user_zipcode)) },
+                label = { Text("CAP") },
                 isError = addressState.isZipCodeError,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
@@ -159,19 +153,13 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             onValueChange = {
                 userFormViewModel.updatePasswordConfirm(it, userState.password)
             },
-            label = { Text(stringResource(R.string.user_password_confirm)) },
+            label = { Text("Conferma Password") },
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
+            isError = userState.isPasswordConfirmError,
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
         )
 
-        if (passwordError) {
-            Text(
-                stringResource(R.string.user_passworderror),
-                style = MaterialTheme.typography.titleSmall,
-
-            )
-        }
 
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -187,16 +175,21 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
 
 
 
-                coroutineScope.launch {
+                if (!nameEmailError && !passwordError) {
+                    coroutineScope.launch {
+                        val response = apiService.register(username, password, email, nome, cognome, indirizzo, addressState.street, addressState.streetNumber, addressState.zipCode, addressState.city, addressState.province)
 
-                        val response=  apiService.register(username, password, email, nome, cognome, indirizzo,addressState.street,addressState.streetNumber,addressState.zipCode,addressState.city,addressState.province)
-                        if(response.isSuccessful){
-                            Log.d("indirizzo", response.body().toString())
-                            showDialog.value= true
+                        if (response.isSuccessful) {
+                            showDialog.value = true
+                            errorMessage.value = ""
+                        } else {
+                            errorMessage.value = "Registrazione non riuscita. Verifica i dati inseriti."
+                            showDialog.value = false
                         }
-
-
-                }
+                    }
+                } else {
+                    showDialog.value = false
+            }
 
             },
             modifier = Modifier.fillMaxWidth()
