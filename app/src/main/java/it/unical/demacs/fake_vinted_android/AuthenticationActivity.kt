@@ -189,6 +189,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
                     }
                 } else {
                     showDialog.value = false
+                    errorMessage.value = "Errore nei campi email o password. Per favore, correggi."
             }
 
             },
