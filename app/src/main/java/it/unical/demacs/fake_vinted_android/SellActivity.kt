@@ -110,6 +110,8 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
         }
 
     var successDialogVisible by remember { mutableStateOf(false) }
+    var imageNullDialogVisible by remember { mutableStateOf(false) }
+    var priceNullDialogVisible by remember { mutableStateOf(false) }
     var failureDialogVisible by remember { mutableStateOf(false) }
     var emptyFieldsDialogVisible by remember { mutableStateOf(false) }
 
@@ -271,15 +273,18 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     Text(text = "Carica immagine")
                 }
 
+                val priceString = priceState.value
+                val price = priceString.toDoubleOrNull()
+
                 Button(
                     modifier = commonModifier
                         .padding(vertical = 8.dp)
                         .height(IntrinsicSize.Max),
                     onClick = {
-                        if (nameState.value.isNotEmpty() && descriptionState.value.isNotEmpty() && priceState.value.isNotEmpty() && !base64Image.value.isNullOrEmpty()) {
+                        if (nameState.value.isNotEmpty() && descriptionState.value.isNotEmpty() && priceState.value.isNotEmpty() && !base64Image.value.isNullOrEmpty() && price!=null) {
                             val nome = nameState.value
                             val descrizione = descriptionState.value
-                            val price = priceState.value.toBigDecimal()
+                            val price1 = priceState.value.toBigDecimal()
                             val categoria = selectedOptionText
                             val condizioni = selectedOptionText1
                             coroutineScope.launch {
@@ -290,7 +295,7 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                                         token,
                                         nome,
                                         descrizione,
-                                        price,
+                                        price1,
                                         base64Image.value ?: "",
                                         categoria,
                                         condizioni
@@ -305,8 +310,14 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                                     failureDialogVisible = true
                                 }
                             }
-                        } else {
-                            emptyFieldsDialogVisible = true
+                        } else if(price == null && !base64Image.value.isNullOrEmpty() ){
+                          priceNullDialogVisible= true
+                        }
+                        else if(base64Image.value.isNullOrEmpty() && price != null){
+                            imageNullDialogVisible = true
+                        }
+                        else{
+                            emptyFieldsDialogVisible =true
                         }
                     }
                 ) {
@@ -333,6 +344,44 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     onClick = {
                         successDialogVisible = false
                         navController.navigate(Routes.FIRSTPAGE.route)
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            })
+    }
+    if (priceNullDialogVisible) {
+        AlertDialog(
+            onDismissRequest = { priceNullDialogVisible = false },
+            title = {
+                Text(text = "Prezzo vuoto o non valido")
+            },
+            text = {
+                Text(text = "modificare il valore inserito nel prezzo!")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        priceNullDialogVisible = false
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            })
+    }
+    if (imageNullDialogVisible) {
+        AlertDialog(
+            onDismissRequest = { imageNullDialogVisible = false },
+            title = {
+                Text(text = "Immagine non inserita")
+            },
+            text = {
+                Text(text = "inserire un'immagine!")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        imageNullDialogVisible = false
                     }
                 ) {
                     Text(text = "OK")
