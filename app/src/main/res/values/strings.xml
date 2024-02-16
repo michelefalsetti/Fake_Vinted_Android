@@ -30,8 +30,6 @@
     <string name="user_page">User page</string>
     <string name="purchase">Proceed to purchase</string>
     <string name="purchase_icon">Purchase icon</string>
-    <string name="add_to_wishlist">Add to wishlist</string>
-    <string name="add_to_wishlist_icon">Add to wishlist icon</string>
     <string name="description">Description of the product</string>
     <string name="item_image">Product picture</string>
     <string name="search_button_icon">Search button icon</string>
@@ -60,5 +58,4 @@
     <string name="add_item_ok">Prodotto caricato con successo!</string>
     <string name="wallet_error">Insert a valid number</string>
     <string name="notification">Notification</string>
-    <string name="change_password_ok">A new password has been successfully sent to your email address</string>
 </resources>
