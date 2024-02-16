@@ -33,13 +33,11 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
     val coroutineScope = rememberCoroutineScope()
     val userState by userFormViewModel.userState.collectAsState()
     val nameEmailError by remember { derivedStateOf { userState.isUsernameError || userState.isEmailError } }
-    val passwordError by remember { derivedStateOf { userState.isPasswordError || userState.isPasswordConfirmError} }
+    val passwordError by remember { derivedStateOf { userState.isPasswordError} }
     val showDialog = remember { mutableStateOf(false) }
     val addressState by addressFormViewModel.addressState.collectAsState()
     val errorMessage = remember { mutableStateOf("") }
     val context = LocalContext.current
-
-
     val commonModifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
 
     Column(
@@ -58,6 +56,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             onValueChange = {userFormViewModel.updateUsername(it)},
             label = { Text("Username") },
             singleLine = true,
+            placeholder = { Text("Inserisci il tuo username") },
             isError = userState.isUsernameError,
         )
 
@@ -67,6 +66,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             onValueChange = { userFormViewModel.updateEmail(it) },
             label = { Text(stringResource(R.string.user_email)) },
             singleLine = true,
+            placeholder = { Text("esempio@gmail.com") },
             isError = userState.isEmailError,
         )
 
@@ -134,7 +134,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 modifier = commonModifier.weight(0.33f)
             )
-            //TODO: add country field
+
         }
 
         OutlinedTextField(
@@ -156,9 +156,11 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             label = { Text("Conferma Password") },
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
-            isError = userState.isPasswordConfirmError,
+            isError = userState.passwordConfirm != userState.password,
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
         )
+
+
 
 
 
@@ -166,6 +168,8 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
 
         Button(
             onClick = {
+
+                errorMessage.value = ""
                 val username = userState.username
                 val password = userState.password
                 val email = userState.email
@@ -175,22 +179,48 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
 
 
 
-                if (!nameEmailError && !passwordError) {
-                    coroutineScope.launch {
-                        val response = apiService.register(username, password, email, nome, cognome, indirizzo, addressState.street, addressState.streetNumber, addressState.zipCode, addressState.city, addressState.province)
+                if (!nameEmailError) {
+                    if (!passwordError) {
+                        if (userState.password == userState.passwordConfirm) {
+                            coroutineScope.launch {
+                                val response = apiService.register(
+                                    username,
+                                    password,
+                                    email,
+                                    nome,
+                                    cognome,
+                                    indirizzo,
+                                    addressState.street,
+                                    addressState.streetNumber,
+                                    addressState.zipCode,
+                                    addressState.city,
+                                    addressState.province
+                                )
 
-                        if (response.isSuccessful) {
-                            showDialog.value = true
-                            errorMessage.value = ""
+                                if (response.isSuccessful) {
+                                    showDialog.value = true
+                                    errorMessage.value = ""
+                                } else {
+                                    errorMessage.value =
+                                        "Registrazione non riuscita. Verifica i dati inseriti."
+                                    showDialog.value = false
+                                }
+                            }
                         } else {
-                            errorMessage.value = "Registrazione non riuscita. Verifica i dati inseriti."
+                            // Gestione dell'errore se la password e la conferma della password non corrispondono
                             showDialog.value = false
+                            errorMessage.value =
+                                "Errore. La password e la conferma della password non corrispondono."
+
                         }
-                    }
+                    }else {
+                        showDialog.value = false
+                        errorMessage.value = "Errore. La password deve avere 1 maiuscola, 1 minuscola, 1 numero e deve essere di almeno 8 caratteri"
+                        }
                 } else {
                     showDialog.value = false
-                    errorMessage.value = "Errore nei campi email o password. Per favore, correggi."
-            }
+                    errorMessage.value = "Errore nel campo email. Per favore, correggi."
+                }
 
             },
             modifier = Modifier.fillMaxWidth()
@@ -198,16 +228,21 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             Text("Registrati")
         }
         if (errorMessage.value.isNotEmpty()) {
-            Snackbar(
-                action = {
+            AlertDialog(
+                onDismissRequest = {
+                    showDialog.value = false
+                },
+                title = {
+                    Text(text = errorMessage.value)
+                },
+                confirmButton = {
                     Button(onClick = { errorMessage.value = "" }) {
                         Text("CHIUDI")
                     }
-                },
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(text = errorMessage.value)
-            }
+
+                }, modifier = Modifier.padding(16.dp)
+
+            )
         }
 
         if (showDialog.value) {
