@@ -32,10 +32,10 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
     val coroutineScope = rememberCoroutineScope()
     val userState by userFormViewModel.userState.collectAsState()
     val nameEmailError by remember { derivedStateOf { userState.isUsernameError || userState.isEmailError } }
-    val passwordError by remember { derivedStateOf { userState.isPasswordError } }
+    val passwordError by remember { derivedStateOf { userState.isPasswordError || userState.isPasswordConfirmError} }
     val showDialog = remember { mutableStateOf(false) }
-    val context = LocalContext.current
     val addressState by addressFormViewModel.addressState.collectAsState()
+    val addressError by remember { derivedStateOf { addressState.isCountryError || addressState.isCityError || addressState.isZipCodeError || addressState.isProvinceError || addressState.isStreetError || addressState.isStreetNumberError} }
     val errorMessage = remember { mutableStateOf("") }
 
 
@@ -113,6 +113,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
                 value = addressState.city,
                 onValueChange = { addressFormViewModel.updateCity(it) },
                 label = { Text(stringResource(R.string.user_city)) },
+                isError = addressState.isCityError,
                 singleLine = true,
                 modifier = commonModifier.weight(0.33f)
             )
@@ -158,13 +159,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
         )
 
-        if (passwordError) {
-            Text(
-                stringResource(R.string.user_passworderror),
-                style = MaterialTheme.typography.titleSmall,
 
-            )
-        }
 
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -182,22 +177,23 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
 
                 coroutineScope.launch {
                     try {
+                        if (!nameEmailError && !passwordError && !addressError) {
+                            val response = apiService.register(username, password, email, nome, cognome, indirizzo)
 
-                        val response=  apiService.register(username, password, email, nome, cognome, indirizzo)
-
-                        if(response.isSuccessful && !nameEmailError && !passwordError){
-
-                            showDialog.value = true
-                            errorMessage.value = ""
-                        } else{
+                            if (response.isSuccessful) {
+                                showDialog.value = true
+                                errorMessage.value = ""
+                            } else {
+                                showDialog.value = false
+                                errorMessage.value = "Registrazione fallita. Per favore, riprova."
+                            }
+                        } else {
                             showDialog.value = false
-                            errorMessage.value = "Errore durante la registrazione"
-
+                            errorMessage.value = "Per favore, correggi gli errori nel form prima di procedere."
                         }
-
-                    } catch ( e : Exception){
+                    } catch (e: Exception) {
                         showDialog.value = false
-                        errorMessage.value = "Errore di connessione o del server"
+                        errorMessage.value = "Errore di connessione o del server. Per favore, riprova."
                     }
                 }
 

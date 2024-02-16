@@ -45,7 +45,7 @@ class User(
 
 
         fun validatePassword(password: String): Boolean {
-            if (password.isNotEmpty())
+            if (password.isNotEmpty() && password.length >= 8 && password.contains(Regex("[a-z]")) && password.contains(Regex("[A-Z]")) && password.contains(Regex("[0-9]")))
                 return true
             return false
         }

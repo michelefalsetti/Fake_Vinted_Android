@@ -19,6 +19,7 @@ data class UserState(
     val isLastNameError: Boolean = !User.validateLastName(lastName = lastName),
     val isEmailError: Boolean = !User.validateEmail(email = email),
     val isPasswordError: Boolean = !User.validatePassword(password = password),
+    val isPasswordConfirmError: Boolean = passwordConfirm.isEmpty()
 
 )
 
@@ -62,7 +63,7 @@ class UserFormViewModel {
         val hasError = !User.validatePassword(password = password)
         _userState.value = _userState.value.copy(
             password = password,
-            isEmailError = hasError
+            isPasswordError = hasError
         )
     }
 
@@ -70,6 +71,7 @@ class UserFormViewModel {
         val hasError = passwordConfirm.isEmpty() && password != passwordConfirm
         _userState.value = _userState.value.copy(
             passwordConfirm = passwordConfirm,
+            isPasswordConfirmError = hasError
 
         )
     }
