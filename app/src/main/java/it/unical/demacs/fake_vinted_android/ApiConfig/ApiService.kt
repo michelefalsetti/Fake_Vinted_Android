@@ -57,9 +57,6 @@ interface ApiService {
 
     @GET("/api/v3/search/{nome}/{token}")
     suspend fun getSearch(@Header("Authorization") token:String?, @Path("nome") nome: String, @Path("token") token_: String?): Response<List<Item>>
-    @GET("/api/v2/Favorites/{token}")
-    suspend fun getFavorites(@Header("Authorization") token:String?, @Path("token") token_: String): Response<List<Item>>
-
     @GET("/api/v2/inVendita/{token}")
     suspend fun getItemInVendita(@Header("Authorization") token: String?, @Path("token") token_: String): Response<List<Item>>
 
@@ -77,19 +74,10 @@ interface ApiService {
         @Field("condizioni") condizioni : String
     ): Response<Item>
 
-    @FormUrlEncoded
-    @POST("/api/v1/newPassword")
-    suspend fun getNewPassword(
-        @Field("email") email: String,
-        @Field("username") username: String,
-    ): Response<String>
-
 
     @FormUrlEncoded
     @POST("/api/v1/buyItem/{item}")
     suspend fun buyItem(@Header("Authorization") token:String?, @Path("item") itemId: Long?, @Field("token") token_: String?, @Field("prezzoTotale") prezzoTotale: Double?) : Response<Unit>
-    @GET("/api/v1/SaldoOk/{itemId}/{token}")
-    suspend fun saldo(@Header("Authorization") token:String?, @Path("itemId") itemId: Long, @Path("token") token_: String?): Response<Unit>
 
     @GET("/api/v2/getPurchase/{token}")
     suspend fun getItemAcquistati(@Header("Authorization") token:String?, @Path("token") token_: String?): Response<List<Item>>
