@@ -156,6 +156,7 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
         coroutineScope.launch {
             if (token != null) {
                 val res = apiService.getItemAcquistati("Bearer $token", token)
+                Log.d("itemacquistati",res.body().toString())
                 val indirizzo = apiService.getIndirizzo("Bearer $token", token)
                 if (res.isSuccessful && indirizzo.isSuccessful) {
 
@@ -166,10 +167,6 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
                     val provincia = indirizzo.body()?.provincia ?: ""
 
                     val indirizzoCompleto = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Nome e Cognome: ")
-                        }
-                        append("${user.nome} ${user.cognome}\n")
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append("Via e Numero Civico: ")
