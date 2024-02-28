@@ -86,7 +86,9 @@ interface ApiService {
         @Field("idofferente") idOfferente: Long?,
         @Field("idproprietario") idProprietario: Long?,
         @Field("idprodotto") idProdotto: Long?,
-        @Field("offerta") offerta: Int?
+        @Field("offerta") offerta: Int?,
+        @Field("usernameutenteofferente") usernameutenteofferente:String?,
+        @Field("nomeprodotto") nomeprodotto:String?,
     ): Response<Unit>
     @GET("/api/v2/getPurchase/{token}")
     suspend fun getItemAcquistati(@Header("Authorization") token:String?, @Path("token") token_: String?): Response<List<Item>>

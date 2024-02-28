@@ -314,7 +314,7 @@ fun ItemContent(item: Item, navController: NavController,sessionManager: Session
                         TextField(
                             value = offerText,
                             onValueChange = {
-                                // Aggiorna offerText quando il testo cambia
+
                                 offerText = it
                             },
                             label = {
@@ -332,15 +332,15 @@ fun ItemContent(item: Item, navController: NavController,sessionManager: Session
                 confirmButton = {
                     Button(
                         onClick = {
-                            // Tenta di convertire offerText in un intero
+
                             val intValue = offerText.toIntOrNull()
 
-                            // Se la conversione è riuscita, aggiorna offerAmount e procedi con l'invio dell'offerta
                             if (intValue != null) {
                                 val offerAmount = intValue
                                 coroutineScope.launch {
                                     val user = apiService.getCurrentUser("Bearer $token", token)
-                                    val response = apiService.makeOffer("Bearer $token", user.body()?.id, item.idUtente, item.id, offerAmount)
+                                    val response = apiService.makeOffer("Bearer $token", user.body()?.id, item.idUtente, item.id, offerAmount,
+                                        user.body()?.username,item.nome)
 
                                     if (response.isSuccessful) {
                                         isOfferSuccessDialogOpen = true
@@ -415,7 +415,6 @@ fun ItemContent(item: Item, navController: NavController,sessionManager: Session
 
         Button(
             onClick = {
-                // Apri il popup quando si fa clic su "Fai un'offerta"
                 isOfferDialogOpen = true
             },
             modifier = Modifier
