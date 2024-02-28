@@ -111,7 +111,7 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
                         .fillMaxHeight()
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly // Dividi lo spazio in modo uniforme
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
 
                     Text(

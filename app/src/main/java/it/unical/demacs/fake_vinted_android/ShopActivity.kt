@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -30,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -55,11 +59,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
+import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.Wallet
 import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserViewModel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -68,6 +74,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
     val items by itemViewModel.itemsInVendita.collectAsState()
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val token = sessionManager.getToken()
+    val apiService = RetrofitClient.create(sessionManager,context)
 
     LaunchedEffect(key1 = true) {
         itemViewModel.fetchItemsInVendita()
@@ -110,14 +120,14 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
             {
 
             items(items) { item ->
-                ItemPreview(item,navController)
+                ItemPreview(item,navController,sessionManager,apiService)
             }
         }
     }
 }
 
 @Composable
-fun ItemPreview(item: Item, navController: NavController) {
+fun ItemPreview(item: Item, navController: NavController,sessionManager: SessionManager, apiService: ApiService) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -171,7 +181,7 @@ fun ItemPreview(item: Item, navController: NavController) {
 
 
 @Composable
-fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel(), navController: NavController) {
+fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel(), navController: NavController, sessionManager: SessionManager, apiService: ApiService) {
 
 
     val item by itemViewModel.currentItem.collectAsState()
@@ -190,14 +200,20 @@ fun ItemPage(itemId: Long, itemViewModel: ItemViewModel = viewModel(), navContro
         } else if (error != null) {
             Text(text = error)
         } else item?.let {
-            ItemContent(item = it, navController = navController)
+            ItemContent(item = it, navController = navController,sessionManager = sessionManager, apiService = apiService)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemContent(item: Item, navController: NavController ) {
+fun ItemContent(item: Item, navController: NavController,sessionManager: SessionManager, apiService: ApiService ) {
+    val token = sessionManager.getToken()
     val scrollState = rememberScrollState()
+    var offerText by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+    var isOfferSuccessDialogOpen by remember { mutableStateOf(false) }
+    var isOfferErrorDialogOpen by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.verticalScroll(scrollState)) {
         item.immagini?.let { imageUrl ->
@@ -280,6 +296,134 @@ fun ItemContent(item: Item, navController: NavController ) {
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        var isOfferDialogOpen by remember { mutableStateOf(false) }
+
+        if (isOfferDialogOpen) {
+            AlertDialog(
+                onDismissRequest = {
+                    isOfferDialogOpen = false
+                },
+                title = {
+                    Text("Fai un'offerta")
+                },
+                text = {
+                    Column {
+                        TextField(
+                            value = offerText,
+                            onValueChange = {
+                                // Aggiorna offerText quando il testo cambia
+                                offerText = it
+                            },
+                            label = {
+                                Text("Importo dell'offerta")
+                            },
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = KeyboardType.Number
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            // Tenta di convertire offerText in un intero
+                            val intValue = offerText.toIntOrNull()
+
+                            // Se la conversione è riuscita, aggiorna offerAmount e procedi con l'invio dell'offerta
+                            if (intValue != null) {
+                                val offerAmount = intValue
+                                coroutineScope.launch {
+                                    val user = apiService.getCurrentUser("Bearer $token", token)
+                                    val response = apiService.makeOffer("Bearer $token", user.body()?.id, item.idUtente, item.id, offerAmount)
+
+                                    if (response.isSuccessful) {
+                                        isOfferSuccessDialogOpen = true
+                                    } else {
+                                        isOfferErrorDialogOpen = true
+                                    }
+                                }
+                                isOfferDialogOpen = false
+                            }
+                        },
+                    ) {
+                        Text("Invia offerta")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            isOfferDialogOpen = false
+                        },
+                    ) {
+                        Text("Annulla")
+                    }
+                }
+            )
+        }
+
+        if (isOfferSuccessDialogOpen) {
+            AlertDialog(
+                onDismissRequest = {
+                    isOfferSuccessDialogOpen = false
+                },
+                title = {
+                    Text("Offerta inviata con successo")
+                },
+                text = {
+                    Text("Se l'utente accetterà o rifiuterà l'offerta ti arriverà una notifica!")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            isOfferSuccessDialogOpen = false
+                        },
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+
+        if (isOfferErrorDialogOpen) {
+            AlertDialog(
+                onDismissRequest = {
+                    isOfferErrorDialogOpen = false
+                },
+                title = {
+                    Text("Errore nell'invio dell'offerta")
+                },
+                text = {
+                    Text("Si è verificato un errore durante l'invio dell'offerta. Riprova più tardi.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            isOfferErrorDialogOpen = false
+                        },
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+
+        Button(
+            onClick = {
+                // Apri il popup quando si fa clic su "Fai un'offerta"
+                isOfferDialogOpen = true
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text("Fai un'offerta")
+        }
 
         Button(
             onClick = { navController.navigate("purchase/${item.id}") },

@@ -183,7 +183,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,ad
         composable(Routes.ITEM.route) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId")?.toLong()
             itemId?.let {
-                ItemPage(itemId = it, itemViewModel = itemViewModel, navController = navController)
+                ItemPage(itemId = it, itemViewModel = itemViewModel, navController = navController, sessionManager = sessionManager,apiService=apiService)
             }
         }
 
@@ -303,7 +303,9 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                     items(searchResult) { item ->
                         ItemPreview(
                             item,
-                            navController
+                            navController,
+                            sessionManager,
+                            apiService
                         )
 
                     }

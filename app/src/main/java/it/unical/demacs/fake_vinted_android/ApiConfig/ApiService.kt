@@ -79,6 +79,15 @@ interface ApiService {
     @POST("/api/v1/buyItem/{item}")
     suspend fun buyItem(@Header("Authorization") token:String?, @Path("item") itemId: Long?, @Field("token") token_: String?, @Field("prezzoTotale") prezzoTotale: Double?) : Response<Unit>
 
+    @FormUrlEncoded
+    @POST("/api/v1/makeOffer")
+    suspend fun makeOffer(
+        @Header("Authorization") token: String?,
+        @Field("idofferente") idOfferente: Long?,
+        @Field("idproprietario") idProprietario: Long?,
+        @Field("idprodotto") idProdotto: Long?,
+        @Field("offerta") offerta: Int?
+    ): Response<Unit>
     @GET("/api/v2/getPurchase/{token}")
     suspend fun getItemAcquistati(@Header("Authorization") token:String?, @Path("token") token_: String?): Response<List<Item>>
 
