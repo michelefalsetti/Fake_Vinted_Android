@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
@@ -25,6 +26,7 @@ enum class Routes(val route: String, val icon: ImageVector, val stringName: Int)
     SEARCH("search",Icons.Default.Search,R.string.search),
     NOTIFICATION("noification/{token}",Icons.Default.Email,R.string.notification),
     PURCHASE("purchase/{itemId}", Icons.Default.CheckCircle,R.string.purchased),
+    OFFER("offer",Icons.Default.Edit,R.string.offer)
 
 
 }

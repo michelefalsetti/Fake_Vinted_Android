@@ -187,12 +187,18 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,ad
             }
         }
 
+        composable(Routes.OFFER.route){
+            OfferPage(apiService = apiService, sessionManager =sessionManager , navController =navController )
+        }
+
         composable(Routes.PURCHASE.route) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId")?.toLong()
             itemId?.let {
                 PurchasePage(itemId = it, itemViewModel = itemViewModel, userViewModel = userViewModel, apiService = apiService, sessionManager = sessionManager, navController = navController)
             }
         }
+
+
 
 
         composable(Routes.SEARCH.route){

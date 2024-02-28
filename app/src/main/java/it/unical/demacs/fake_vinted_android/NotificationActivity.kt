@@ -2,6 +2,8 @@ package it.unical.demacs.fake_vinted_android
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
@@ -9,10 +11,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -24,6 +28,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -64,6 +70,10 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
             notificationResult = res.body() ?: emptyList()
         }
     }
+
+
+
+
 
     Scaffold(
         bottomBar = {
@@ -93,15 +103,55 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
             }
         }
     ) {innerpadding ->
+        TopAppBar(
+            title = {  },
+            actions = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly // Dividi lo spazio in modo uniforme
+                ) {
+
+                    Text(
+                        text = "Notifiche",
+                        modifier = Modifier
+                            .clickable {
+                                 navController.navigate(Routes.NOTIFICATION.route)
+                            }
+                            .align(Alignment.CenterVertically)
+                            .padding(8.dp),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        textAlign = TextAlign.Center
+                    )
+
+
+                    Spacer(
+                        modifier = Modifier
+                            .background(Color.Gray)
+                            .width(2.dp)
+                            .height(30.dp)
+                            .fillMaxHeight()
+                    )
+
+
+                    Text(
+                        text = "Offerte",
+                        modifier = Modifier
+                            .clickable {
+                                navController.navigate(Routes.OFFER.route)
+                            }
+                            .align(Alignment.CenterVertically) // Centra il testo verticalmente
+                            .padding(8.dp),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        textAlign = TextAlign.Center  // Centra il testo orizzontalmente
+                    )
+                }
+            },
+        )
+
         Column {
-            Text(
-                text = "Notifiche",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp, 10.dp, 0.dp, 0.dp),
-                textAlign = TextAlign.Center
-            )
             Spacer(modifier = Modifier.height(10.dp))
 
 
@@ -149,6 +199,101 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
 
 
 
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navController: NavController) {
+    val token = sessionManager.getToken()
+    Scaffold(
+        bottomBar = {
+            BottomAppBar {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    IconButton(onClick = { navController.navigate(Routes.FIRSTPAGE.route) }) {
+                        Icon(imageVector = Icons.Default.Home, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.SEARCH.route) }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.ADDITEM.route) }) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.NOTIFICATION.route) }) {
+                        Icon(
+                            Icons.Default.Email, contentDescription = null,
+                        )
+                    }
+                    IconButton(onClick = { navController.navigate(Routes.PROFILE.route) }) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = null)
+                    }
+                }
+            }
+        }
+    ) {
+        TopAppBar(
+         title = {  },
+         actions = {
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+
+                Text(
+                    text = "Notifiche",
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate(Routes.NOTIFICATION.route)
+                        }
+                        .align(Alignment.CenterVertically)
+                        .padding(8.dp),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    textAlign = TextAlign.Center
+                )
+
+
+                Spacer(
+                    modifier = Modifier
+                        .background(Color.Gray)
+                        .width(2.dp)
+                        .height(30.dp)
+                        .fillMaxHeight()
+                )
+
+
+                Text(
+                    text = "Offerte",
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate(Routes.OFFER.route)
+
+                        }
+                        .align(Alignment.CenterVertically)
+                        .padding(8.dp),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+    )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "Nessuna offerta arrivata!")
+        }
+
+    }
+
+
+}
 
 
 

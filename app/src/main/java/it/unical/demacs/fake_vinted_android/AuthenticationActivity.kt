@@ -311,7 +311,9 @@ fun LoginPage(navController: NavController, apiService: ApiService, sessionManag
 
                 coroutineScope.launch {
                     try {
+                        Log.d("token",sessionManager.getToken().toString())
                         sessionManager.clearToken()
+                        Log.d("token",sessionManager.getToken().toString())
                         sessionManager.clearUsername()
                         val response = apiService.authenticate(username, password)
                         if(response.isSuccessful){
