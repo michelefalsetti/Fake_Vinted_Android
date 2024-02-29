@@ -18,6 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
@@ -44,9 +46,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -128,6 +132,7 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
 
 @Composable
 fun ItemPreview(item: Item, navController: NavController,sessionManager: SessionManager, apiService: ApiService) {
+    val isFavorited = remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -156,26 +161,37 @@ fun ItemPreview(item: Item, navController: NavController,sessionManager: Session
                 )
 
             }
-            Text(item.nome, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),modifier = Modifier
+            Text(item.nome, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
                 textAlign = TextAlign.Center)
 
-            val prezzoText = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append("Prezzo: ")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val prezzoText = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Prezzo: ")
+                    }
+                    append("${item.prezzo}€")
                 }
-                append("${item.prezzo}€")
-            }
 
-            Text(
-                text = prezzoText,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(horizontal = 12.dp)
+                Text(
+                    text = prezzoText,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
 
-            )
-            // Aggiungi altre informazioni sull'articolo se necessario
-        }
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Cuore cliccabile
+                IconButton(onClick = { isFavorited.value = !isFavorited.value }) {
+                    Icon(
+                        imageVector = if (isFavorited.value) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = "Preferito",
+                        modifier = Modifier.size(40.dp),
+                        tint = if (isFavorited.value) Color.Red else Color.Black
+                    )
+                }
+            }}
     }
 }
 
