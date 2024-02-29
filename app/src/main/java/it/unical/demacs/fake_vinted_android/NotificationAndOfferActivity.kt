@@ -212,13 +212,13 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
 
     LaunchedEffect(token) {
         if (offerResult.isEmpty()) {
-            val user= apiService.getCurrentUser("Bearer $token", token)
+            val user = apiService.getCurrentUser("Bearer $token", token)
             val res = user.body()?.let { apiService.getOffersByUserId("Bearer $token", it.id) }
             if (res != null) {
                 offerResult = res.body() ?: emptyList()
             }
             if (res != null) {
-                Log.d("offerte",res.body().toString())
+                Log.d("offerte", res.body().toString())
             }
         }
     }
@@ -304,6 +304,8 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
             Column {
                 Spacer(modifier = Modifier.height(10.dp))
 
+                var deletedOfferId by remember { mutableStateOf<Long?>(null) }
+
                 if (offerResult.isNotEmpty()) {
                     LazyColumn(
                         contentPadding = PaddingValues(
@@ -315,77 +317,90 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                             .padding(16.dp)
                     ) {
                         items(offerResult) { offer ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp),
-                                elevation = CardDefaults.cardElevation()
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(
-                                        text = "L'utente ${offer.usernameutenteofferente} ha offerto ${offer.offerta}€ per l'articolo ${offer.nomeprodotto}"
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
+                            if (offer.idofferta?.toLong() != deletedOfferId) {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp),
+                                    elevation = CardDefaults.cardElevation()
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Text(
+                                            text = "L'utente ${offer.usernameutenteofferente} ha offerto ${offer.offerta}€ per l'articolo ${offer.nomeprodotto}"
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
 
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 8.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Button(
-                                            onClick = {
-                                                coroutineScope.launch {
-
-                                                    offer.idofferente?.let {
-                                                        apiService.addUserNotification(
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 8.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Button(
+                                                onClick = {
+                                                    coroutineScope.launch {
+                                                        offer.idofferente?.let {
+                                                            apiService.addUserNotification(
+                                                                "Bearer $token",
+                                                                token,
+                                                                it,
+                                                                "la tua offerta è stata accettata, hai acquistato l'articolo ${offer.nomeprodotto}!"
+                                                            )
+                                                        }
+                                                        val prezzototale = offer.offerta?.plus(2.99)
+                                                        apiService.buyItem(
                                                             "Bearer $token",
+                                                            offer.usernameutenteofferente,
+                                                            offer.idprodotto,
                                                             token,
-                                                            it,
-                                                            "la tua offerta è stata accettata, hai acquistato l'articolo ${offer.nomeprodotto}!"
+                                                            prezzototale
                                                         )
+                                                        offer.idofferta?.let {
+                                                            apiService.deleteOffer(
+                                                                "Bearer $token",
+                                                                it
+                                                            )
+                                                            deletedOfferId =
+                                                                it
+                                                        }
                                                     }
-                                                    val prezzototale = offer.offerta?.plus(2.99)
+                                                },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(end = 4.dp),
+                                                contentPadding = PaddingValues(8.dp),
+                                            ) {
+                                                Text(text = "Accetta", fontSize = 12.sp)
+                                            }
 
-                                                    apiService.buyItem("Bearer $token",offer.usernameutenteofferente,offer.idprodotto,token,prezzototale)
-                                                    offer.idofferta?.let {
-                                                        apiService.deleteOffer("Bearer $token",
-                                                            it
-                                                        )
+                                            Button(
+                                                onClick = {
+                                                    coroutineScope.launch {
+                                                        offer.idofferente?.let {
+                                                            apiService.addUserNotification(
+                                                                "Bearer $token",
+                                                                token,
+                                                                it,
+                                                                "la tua offerta per l'articolo ${offer.nomeprodotto} è stata rifiutata, ci dispiace!"
+                                                            )
+                                                        }
+                                                        offer.idofferta?.let {
+                                                            apiService.deleteOffer(
+                                                                "Bearer $token",
+                                                                it
+                                                            )
+                                                            deletedOfferId =
+                                                                it
+                                                        }
                                                     }
-                                                }
-                                             },
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(end = 4.dp),
-                                            contentPadding = PaddingValues(8.dp),
-                                        ) {
-                                            Text(text = "Accetta",fontSize = 12.sp)
-                                        }
-
-                                        Button(
-                                            onClick = { coroutineScope.launch {
-
-                                                offer.idofferente?.let {
-                                                    apiService.addUserNotification(
-                                                        "Bearer $token",
-                                                        token,
-                                                        it,
-                                                        "la tua offerta per l'articolo ${offer.nomeprodotto} è stata rifiutata, ci dispiace!"
-                                                    )
-                                                }
-                                                offer.idofferta?.let {
-                                                    apiService.deleteOffer("Bearer $token",
-                                                        it
-                                                    )
-                                                }
-                                            } },
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(start = 4.dp),
-                                            contentPadding = PaddingValues(8.dp),
-                                        ) {
-                                            Text(text = "Rifiuta",fontSize = 12.sp)
+                                                },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(start = 4.dp),
+                                                contentPadding = PaddingValues(8.dp),
+                                            ) {
+                                                Text(text = "Rifiuta", fontSize = 12.sp)
+                                            }
                                         }
                                     }
                                 }
@@ -404,7 +419,6 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                 }
             }
         }
-
     }
 }
 
