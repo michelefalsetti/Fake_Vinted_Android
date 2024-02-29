@@ -376,7 +376,10 @@ fun ItemContent(item: Item, navController: NavController,sessionManager: Session
                     Text("Offerta inviata con successo")
                 },
                 text = {
-                    Text("Se l'utente accetterà o rifiuterà l'offerta ti arriverà una notifica!")
+                    Text("Se l'utente accetterà o rifiuterà l'offerta ti arriverà una notifica!" +
+                            "                                                                                                   " +
+                            "N.B. se l'utente accetterà l'offerta acquisterai automaticamente il prodotto!")
+
                 },
                 confirmButton = {
                     Button(
@@ -566,7 +569,8 @@ fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionMa
             onClick = {
                 if (wallet.saldo >= prezzoTotale!! && item.idUtente != userState?.id) {
                     coroutineScope.launch {
-                        apiService.buyItem("Bearer $token", item.id, token, prezzoTotale)
+                        apiService.buyItem("Bearer $token",
+                            userState?.username,item.id, token, prezzoTotale)
 
                         item.idUtente?.let {
                             apiService.addUserNotification("Bearer $token",token,

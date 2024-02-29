@@ -2,12 +2,14 @@ package it.unical.demacs.fake_vinted_android.ApiConfig
 import it.unical.demacs.fake_vinted_android.model.Address
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.Notifications
+import it.unical.demacs.fake_vinted_android.model.Offer
 import it.unical.demacs.fake_vinted_android.model.User
 import it.unical.demacs.fake_vinted_android.model.Utente
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
 import retrofit2.http.GET
 import retrofit2.Response
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
@@ -77,7 +79,7 @@ interface ApiService {
 
     @FormUrlEncoded
     @POST("/api/v1/buyItem/{item}")
-    suspend fun buyItem(@Header("Authorization") token:String?, @Path("item") itemId: Long?, @Field("token") token_: String?, @Field("prezzoTotale") prezzoTotale: Double?) : Response<Unit>
+    suspend fun buyItem(@Header("Authorization") token:String?, @Field("username") username :String?,@Path("item") itemId: Long?, @Field("token") token_: String?, @Field("prezzoTotale") prezzoTotale: Double?) : Response<Unit>
 
     @FormUrlEncoded
     @POST("/api/v1/makeOffer")
@@ -105,6 +107,12 @@ interface ApiService {
 
     @GET("/api/v2/getAddress/{token}")
     suspend fun getIndirizzo(@Header("Authorization") token:String?, @Path("token") token_: String?): Response<Address>
+
+    @GET("/api/v1/getOffers/{userId}")
+    suspend fun getOffersByUserId(@Header("Authorization") token: String?, @Path("userId") userId: Long): Response<List<Offer>>
+
+    @DELETE("/api/v1/deleteOffer/{id}")
+    suspend fun deleteOffer(@Header("Authorization") token: String?, @Path("id") id: Long): Response<Unit>
 
 
 
