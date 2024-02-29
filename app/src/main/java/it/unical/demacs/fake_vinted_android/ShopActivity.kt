@@ -214,6 +214,9 @@ fun ItemContent(item: Item, navController: NavController,sessionManager: Session
     val coroutineScope = rememberCoroutineScope()
     var isOfferSuccessDialogOpen by remember { mutableStateOf(false) }
     var isOfferErrorDialogOpen by remember { mutableStateOf(false) }
+    var ownitemerror by remember { mutableStateOf(false) }
+    var lowwalleterror by remember { mutableStateOf(false) }
+    var invalidoffer by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.verticalScroll(scrollState)) {
         item.immagini?.let { imageUrl ->
@@ -338,17 +341,37 @@ fun ItemContent(item: Item, navController: NavController,sessionManager: Session
                             if (intValue != null) {
                                 val offerAmount = intValue
                                 coroutineScope.launch {
+                                    val saldo = apiService.getSaldo("Bearer $token", token)
                                     val user = apiService.getCurrentUser("Bearer $token", token)
-                                    val response = apiService.makeOffer("Bearer $token", user.body()?.id, item.idUtente, item.id, offerAmount,
-                                        user.body()?.username,item.nome)
+                                    val prezzoconspedizione = offerAmount + 2.99
 
-                                    if (response.isSuccessful) {
-                                        isOfferSuccessDialogOpen = true
-                                    } else {
-                                        isOfferErrorDialogOpen = true
+                                    if (user.body()?.id == item.idUtente) {
+                                        ownitemerror = true
+
+                                    } else if (saldo.body()?.saldo!! < prezzoconspedizione) {
+                                       lowwalleterror = true
+                                    } else if (offerAmount ==0 || offerAmount> item.prezzo!!){
+                                        invalidoffer = true
                                     }
+                                    else{
+                                        val response = apiService.makeOffer(
+                                            "Bearer $token",
+                                            user.body()?.id,
+                                            item.idUtente,
+                                            item.id,
+                                            offerAmount,
+                                            user.body()?.username,
+                                            item.nome
+                                        )
+
+                                        if (response.isSuccessful) {
+                                            isOfferSuccessDialogOpen = true
+                                        } else {
+                                            isOfferErrorDialogOpen = true
+                                        }
+                                    }
+                                    isOfferDialogOpen = false
                                 }
-                                isOfferDialogOpen = false
                             }
                         },
                     ) {
@@ -408,6 +431,75 @@ fun ItemContent(item: Item, navController: NavController,sessionManager: Session
                     Button(
                         onClick = {
                             isOfferErrorDialogOpen = false
+                        },
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+
+        if (ownitemerror) {
+            AlertDialog(
+                onDismissRequest = {
+                    ownitemerror = false
+                },
+                title = {
+                    Text("Errore nell'invio dell'offerta")
+                },
+                text = {
+                    Text("Non puoi fare offerte per i tuoi articoli!")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                           ownitemerror= false
+                        },
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+
+        if (lowwalleterror) {
+            AlertDialog(
+                onDismissRequest = {
+                    lowwalleterror= false
+                },
+                title = {
+                    Text("Errore nell'invio dell'offerta")
+                },
+                text = {
+                    Text("Saldo insufficiente, ci dispiace!")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            lowwalleterror= false
+                        },
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+
+        if (invalidoffer) {
+            AlertDialog(
+                onDismissRequest = {
+                   invalidoffer = false
+                },
+                title = {
+                    Text("Offerta non valida")
+                },
+                text = {
+                    Text("L'offerta deve essere maggiore di 0 e minore uguale al prezzo di vendita!")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                           invalidoffer= false
                         },
                     ) {
                         Text("OK")
