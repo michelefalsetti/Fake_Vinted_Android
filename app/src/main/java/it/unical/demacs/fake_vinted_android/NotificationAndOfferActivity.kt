@@ -347,6 +347,11 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                                                                 "la tua offerta è stata accettata, hai acquistato l'articolo ${offer.nomeprodotto}!"
                                                             )
                                                         }
+
+                                                        offer.idproprietario?.let {
+                                                            apiService.addUserNotification("Bearer $token",token,
+                                                                it,"L'utente ${offer.usernameutenteofferente} ha acquistato il tuo prodotto ${offer.nomeprodotto}!" )
+                                                        }
                                                         val prezzototale = offer.offerta?.plus(2.99)
                                                         apiService.buyItem(
                                                             "Bearer $token",
