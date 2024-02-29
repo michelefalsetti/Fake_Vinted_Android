@@ -1,6 +1,7 @@
 package it.unical.demacs.fake_vinted_android.ApiConfig
 import it.unical.demacs.fake_vinted_android.model.Address
 import it.unical.demacs.fake_vinted_android.model.Item
+import it.unical.demacs.fake_vinted_android.model.Favorites
 import it.unical.demacs.fake_vinted_android.model.Notifications
 import it.unical.demacs.fake_vinted_android.model.Offer
 import it.unical.demacs.fake_vinted_android.model.User
@@ -113,6 +114,10 @@ interface ApiService {
 
     @DELETE("/api/v1/deleteOffer/{idprodotto}")
     suspend fun deleteOffer(@Header("Authorization") token: String?, @Path("idprodotto") idprodotto: Long): Response<Unit>
+
+    @GET("/api/v1/getFavorites/{userId}")
+    suspend fun getFavorites(@Header("Authorization") token: String?, @Path("userId") userId: Long): Response<Favorites>
+
 
 
 
