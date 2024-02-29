@@ -122,15 +122,15 @@ interface ApiService {
     @POST("/api/v1/addToFavorites")
     suspend fun addFavorite(
         @Header("Authorization") token: String?,
-        @Field("idutente") idutente: Long,
-        @Field("idprodotto") idprodotto: Long
+        @Field("idutente") idutente: Long?,
+        @Field("idprodotto") idprodotto: Long?
     ): Response<Unit>
 
     @DELETE("/api/v1/removeFromFavorites/{idutente}/{idprodotto}")
     suspend fun removeFromFavorites(
         @Header("Authorization") token: String?,
-        @Path("idutente") idutente: Long,
-        @Path("idprodotto") idprodotto: Long
+        @Path("idutente") idutente: Long?,
+        @Path("idprodotto") idprodotto: Long?
     ): Response<Unit>
 
 

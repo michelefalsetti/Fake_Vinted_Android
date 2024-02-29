@@ -132,7 +132,9 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
 
 @Composable
 fun ItemPreview(item: Item, navController: NavController,sessionManager: SessionManager, apiService: ApiService) {
-    val isFavorited = remember { mutableStateOf(false) }
+    var isFavorited by remember { mutableStateOf(false) } // Aggiungi questo stato per gestire i preferiti
+    val coroutineScope = rememberCoroutineScope()
+
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -182,13 +184,30 @@ fun ItemPreview(item: Item, navController: NavController,sessionManager: Session
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Cuore cliccabile
-                IconButton(onClick = { isFavorited.value = !isFavorited.value }) {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        val token = sessionManager.getToken()
+                        val user = apiService.getCurrentUser("Bearer $token", token)
+                        if (token != null) {
+                            val response = if (isFavorited) {
+                                // Chiama API per rimuovere dai preferiti
+                                apiService.removeFromFavorites("Bearer $token", user.body()?.id, item.id)
+                            } else {
+                                // Chiama API per aggiungere ai preferiti
+                                apiService.addFavorite("Bearer $token", user.body()?.id, item.id)
+                            }
+
+                            if (response.isSuccessful) {
+                                isFavorited = !isFavorited // Aggiorna lo stato dei preferiti
+                            } else {
+                            }
+                            }
+                    }
+                }) {
                     Icon(
-                        imageVector = if (isFavorited.value) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        imageVector = if (isFavorited) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                         contentDescription = "Preferito",
-                        modifier = Modifier.size(40.dp),
-                        tint = if (isFavorited.value) Color.Red else Color.Black
+                        tint = if (isFavorited) Color.Red else Color.Gray
                     )
                 }
             }}
