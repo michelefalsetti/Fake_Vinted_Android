@@ -115,11 +115,23 @@ interface ApiService {
     @DELETE("/api/v1/deleteOffer/{idprodotto}")
     suspend fun deleteOffer(@Header("Authorization") token: String?, @Path("idprodotto") idprodotto: Long): Response<Unit>
 
-    @GET("/api/v1/getFavorites/{userId}")
-    suspend fun getFavorites(@Header("Authorization") token: String?, @Path("userId") userId: Long): Response<Favorites>
+    @GET("/api/v1/getFavorites/{idUtente}")
+    suspend fun getFavorites(@Header("Authorization") token: String?, @Path("idUtente") idUtente: Long): Response<List<Favorites>>
 
+    @FormUrlEncoded
+    @POST("/api/v1/addToFavorites")
+    suspend fun addFavorite(
+        @Header("Authorization") token: String?,
+        @Field("idutente") idutente: Long,
+        @Field("idprodotto") idprodotto: Long
+    ): Response<Unit>
 
-
+    @DELETE("/api/v1/removeFromFavorites/{idutente}/{idprodotto}")
+    suspend fun removeFromFavorites(
+        @Header("Authorization") token: String?,
+        @Path("idutente") idutente: Long,
+        @Path("idprodotto") idprodotto: Long
+    ): Response<Unit>
 
 
 
