@@ -360,7 +360,7 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                                                             token,
                                                             prezzototale
                                                         )
-                                                        offer.idofferta?.let {
+                                                        offer.idprodotto?.let {
                                                             apiService.deleteOffer(
                                                                 "Bearer $token",
                                                                 it
@@ -389,7 +389,7 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                                                                 "la tua offerta per l'articolo ${offer.nomeprodotto} è stata rifiutata, ci dispiace!"
                                                             )
                                                         }
-                                                        offer.idofferta?.let {
+                                                        offer.idprodotto?.let {
                                                             apiService.deleteOffer(
                                                                 "Bearer $token",
                                                                 it

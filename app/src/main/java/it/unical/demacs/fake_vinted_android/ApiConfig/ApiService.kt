@@ -111,8 +111,8 @@ interface ApiService {
     @GET("/api/v1/getOffers/{userId}")
     suspend fun getOffersByUserId(@Header("Authorization") token: String?, @Path("userId") userId: Long): Response<List<Offer>>
 
-    @DELETE("/api/v1/deleteOffer/{id}")
-    suspend fun deleteOffer(@Header("Authorization") token: String?, @Path("id") id: Long): Response<Unit>
+    @DELETE("/api/v1/deleteOffer/{idprodotto}")
+    suspend fun deleteOffer(@Header("Authorization") token: String?, @Path("idprodotto") idprodotto: Long): Response<Unit>
 
 
 
