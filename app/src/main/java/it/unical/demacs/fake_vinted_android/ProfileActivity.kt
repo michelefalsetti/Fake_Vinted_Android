@@ -74,6 +74,7 @@ import androidx.navigation.NavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
 import it.unical.demacs.fake_vinted_android.model.Address
+import it.unical.demacs.fake_vinted_android.model.Favorites
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
@@ -147,6 +148,7 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
 fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sessionManager: SessionManager, navController: NavController) {
     val token = sessionManager.getToken()
     val itemsAcquistati = remember { mutableListOf<Item>() }
+    val itemsPreferiti = remember { mutableListOf<Item>() }
     val showResult = remember { mutableStateOf(false) }
     var indirizzoText by remember { mutableStateOf<AnnotatedString?>(null) }
 
@@ -155,10 +157,13 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
     LaunchedEffect(key1 = true) {
         coroutineScope.launch {
             if (token != null) {
+                val user = apiService.getCurrentUser("Bearer $token", token)
                 val res = apiService.getItemAcquistati("Bearer $token", token)
                 Log.d("itemacquistati",res.body().toString())
+                val ress = apiService.getFavorites("Bearer $token", user.body()?.id)
+
                 val indirizzo = apiService.getIndirizzo("Bearer $token", token)
-                if (res.isSuccessful && indirizzo.isSuccessful) {
+                if (ress.isSuccessful && res.isSuccessful && indirizzo.isSuccessful) {
 
                     val via = indirizzo.body()?.via ?: ""
                     val numerocivico = indirizzo.body()?.numerocivico ?: ""
@@ -188,6 +193,10 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
                     for (item in res.body()!!) {
                         Log.d("oggetti", item.toString())
                         itemsAcquistati.add(item)
+                    }
+                    for (item in ress.body()!!) {
+                        Log.d("preferiti", item.toString())
+                        itemsPreferiti.add(item)
                     }
                     showResult.value = true
                 }
@@ -280,11 +289,13 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
     var datiEspanso by remember { mutableStateOf(false) }
     var indirizzoEspanso by remember { mutableStateOf(false) }
     var storicoEspanso by remember { mutableStateOf(false) }
+    var preferitiEspanso by remember { mutableStateOf(false) }
 
     Column {
         Button(
             onClick = { datiEspanso = !datiEspanso
                 storicoEspanso = false
+                preferitiEspanso = false
                 indirizzoEspanso = false},
             modifier = Modifier
                 .fillMaxWidth()
@@ -343,6 +354,7 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
         Column {
             Button(onClick = { indirizzoEspanso = !indirizzoEspanso
                 datiEspanso = false
+                preferitiEspanso = false
                 storicoEspanso = false},
                 modifier = Modifier
                     .fillMaxWidth()
@@ -382,7 +394,8 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
         Column {
             Button(onClick = { storicoEspanso = !storicoEspanso
                 datiEspanso = false
-                indirizzoEspanso = false},
+                preferitiEspanso = false
+                indirizzoEspanso = false },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)) {
@@ -415,6 +428,46 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
                 }
             }
         }
+
+
+    Column {
+        Button(onClick = { preferitiEspanso = !preferitiEspanso
+            datiEspanso = false
+            storicoEspanso = false
+            indirizzoEspanso = false },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)) {
+            Text(if (preferitiEspanso) "Prodotti Preferiti⌄" else "Prodotti Preferiti >")
+        }
+
+        if (preferitiEspanso) {
+            if (showResult.value) {
+                if (itemsPreferiti.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        items(itemsPreferiti) { item ->
+                            ItemPreferitiPreview(
+                                item
+                            )
+                        }
+                    }
+                } else {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text("Nessun prodotto preferito!")
+                    }
+                }
+            }
+        }
+    }
+
     Spacer(modifier = Modifier.padding(120.dp))
     Button(onClick = { sessionManager.logout()
         navController.navigate(Routes.HOME.route)}) {
@@ -428,6 +481,58 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
 
 @Composable
 fun ItemAcquistatiPreview(item: Item) {
+    Card(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation()
+    ) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            item.immagini?.let { imageUrl ->
+                val imageBitmap = remember {
+                    val decodedBytes = Base64.decode(imageUrl.substringAfter(','), Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                }
+                Image(
+                    bitmap = imageBitmap.asImageBitmap(),
+                    contentDescription = "Immagine Prodotto",
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.onSurface),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+                Text(item.nome, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+
+                val prezzoText = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Prezzo: ")
+                    }
+                    append("${item.prezzo}€")
+                }
+
+                Text(
+                    text = prezzoText,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+fun ItemPreferitiPreview(item: Item) {
+
     Card(
         modifier = Modifier
             .padding(8.dp)

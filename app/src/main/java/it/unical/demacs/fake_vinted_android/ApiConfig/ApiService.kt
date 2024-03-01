@@ -116,7 +116,7 @@ interface ApiService {
     suspend fun deleteOffer(@Header("Authorization") token: String?, @Path("idprodotto") idprodotto: Long): Response<Unit>
 
     @GET("/api/v1/getFavorites/{idUtente}")
-    suspend fun getFavorites(@Header("Authorization") token: String?, @Path("idUtente") idUtente: Long): Response<List<Favorites>>
+    suspend fun getFavorites(@Header("Authorization") token: String?, @Path("idUtente") idUtente: Long?): Response<List<Item>>
 
     @FormUrlEncoded
     @POST("/api/v1/addToFavorites")
