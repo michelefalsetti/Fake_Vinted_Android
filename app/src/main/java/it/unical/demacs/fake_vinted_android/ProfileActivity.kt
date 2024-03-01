@@ -6,10 +6,8 @@ import android.util.Base64
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -19,13 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -35,8 +30,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,24 +56,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
-import it.unical.demacs.fake_vinted_android.model.Address
-import it.unical.demacs.fake_vinted_android.model.Favorites
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
 import it.unical.demacs.fake_vinted_android.viewmodels.UserViewModel
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,7 +134,7 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
 fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sessionManager: SessionManager, navController: NavController) {
     val token = sessionManager.getToken()
     val itemsAcquistati = remember { mutableListOf<Item>() }
-    val itemsPreferiti = remember { mutableListOf<Item>() }
+    val itemsPreferiti = remember { mutableStateOf<List<Item>>(emptyList()) }
     val showResult = remember { mutableStateOf(false) }
     var indirizzoText by remember { mutableStateOf<AnnotatedString?>(null) }
 
@@ -161,7 +147,17 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
                 val res = apiService.getItemAcquistati("Bearer $token", token)
                 Log.d("itemacquistati",res.body().toString())
                 val ress = apiService.getFavorites("Bearer $token", user.body()?.id)
-
+                if (ress.isSuccessful) {
+                    val favorites = ress.body() ?: emptyList()
+                    val items = mutableListOf<Item>()
+                    for (favorite in favorites) {
+                        val itemResponse = apiService.getItem("Bearer $token", favorite.idprodotto)
+                        if (itemResponse.isSuccessful) {
+                            itemResponse.body()?.let { items.add(it) }
+                        }
+                    }
+                    itemsPreferiti.value = items
+                }
                 val indirizzo = apiService.getIndirizzo("Bearer $token", token)
                 if (ress.isSuccessful && res.isSuccessful && indirizzo.isSuccessful) {
 
@@ -194,10 +190,7 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
                         Log.d("oggetti", item.toString())
                         itemsAcquistati.add(item)
                     }
-                    for (item in ress.body()!!) {
-                        Log.d("preferiti", item.toString())
-                        itemsPreferiti.add(item)
-                    }
+
                     showResult.value = true
                 }
 
@@ -443,13 +436,13 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
 
         if (preferitiEspanso) {
             if (showResult.value) {
-                if (itemsPreferiti.isNotEmpty()) {
+                if (itemsPreferiti.value.isNotEmpty()) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        items(itemsPreferiti) { item ->
+                        items(itemsPreferiti.value) { item ->
                             ItemPreferitiPreview(
                                 item
                             )

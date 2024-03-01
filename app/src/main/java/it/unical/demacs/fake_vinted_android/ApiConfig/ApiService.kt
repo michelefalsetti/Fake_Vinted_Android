@@ -4,7 +4,6 @@ import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.Favorites
 import it.unical.demacs.fake_vinted_android.model.Notifications
 import it.unical.demacs.fake_vinted_android.model.Offer
-import it.unical.demacs.fake_vinted_android.model.User
 import it.unical.demacs.fake_vinted_android.model.Utente
 import it.unical.demacs.fake_vinted_android.model.UtenteDTO
 import it.unical.demacs.fake_vinted_android.model.Wallet
@@ -53,7 +52,7 @@ interface ApiService {
     ): Response<Utente>
 
     @GET("/api/v3/item/{itemId}")
-    suspend fun getItem(@Header("Authorization") token:String?, @Path("itemId") itemId: Long): Response<Item>
+    suspend fun getItem(@Header("Authorization") token:String?, @Path("itemId") itemId: Long?): Response<Item>
 
     @GET("/api/v3/{token}/notification")
     suspend fun getUserNotification(@Header("Authorization") token: String?,@Path("token") token_: String?): Response<List<Notifications>>
@@ -116,7 +115,7 @@ interface ApiService {
     suspend fun deleteOffer(@Header("Authorization") token: String?, @Path("idprodotto") idprodotto: Long): Response<Unit>
 
     @GET("/api/v1/getFavorites/{idUtente}")
-    suspend fun getFavorites(@Header("Authorization") token: String?, @Path("idUtente") idUtente: Long?): Response<List<Item>>
+    suspend fun getFavorites(@Header("Authorization") token: String?, @Path("idUtente") idUtente: Long?): Response<List<Favorites>>
 
     @FormUrlEncoded
     @POST("/api/v1/addToFavorites")
