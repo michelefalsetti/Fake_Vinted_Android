@@ -65,6 +65,7 @@ import androidx.navigation.compose.rememberNavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
+import it.unical.demacs.fake_vinted_android.model.Favorites
 import it.unical.demacs.fake_vinted_android.model.Item
 import it.unical.demacs.fake_vinted_android.model.Wallet
 import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
@@ -82,9 +83,14 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
     val sessionManager = remember { SessionManager(context) }
     val token = sessionManager.getToken()
     val apiService = RetrofitClient.create(sessionManager,context)
+    val favorites by itemViewModel.favorites.collectAsState()
+
+
 
     LaunchedEffect(key1 = true) {
+        itemViewModel.loadFavorites()
         itemViewModel.fetchItemsInVendita()
+
     }
 
     Scaffold(
@@ -124,15 +130,15 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
             {
 
             items(items) { item ->
-                ItemPreview(item,navController,sessionManager,apiService)
+                ItemPreview(item,navController,sessionManager,apiService, favorites)
             }
         }
     }
 }
 
 @Composable
-fun ItemPreview(item: Item, navController: NavController,sessionManager: SessionManager, apiService: ApiService) {
-    var isFavorited by remember { mutableStateOf(false) } // Aggiungi questo stato per gestire i preferiti
+fun ItemPreview(item: Item, navController: NavController,sessionManager: SessionManager, apiService: ApiService, favorites: Set<Favorites>) {
+    var isFavorited by remember { mutableStateOf(favorites.any { it.idprodotto == item.id }) }
     val coroutineScope = rememberCoroutineScope()
 
     Card(

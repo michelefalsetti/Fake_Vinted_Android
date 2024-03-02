@@ -293,7 +293,7 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                 singleLine = true,
                 placeholder = { Text(text = "Cerca i prodotti!") }
             )
-            if (showResult.value) {
+            /*if (showResult.value) {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -305,7 +305,8 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                             item,
                             navController,
                             sessionManager,
-                            apiService
+                            apiService,
+                            favorites
                         )
 
                     }
@@ -313,7 +314,7 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                 }
 
 
-            }
+            }*/
 
         }
 

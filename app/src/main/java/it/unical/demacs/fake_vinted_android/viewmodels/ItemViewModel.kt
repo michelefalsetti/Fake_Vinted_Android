@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.RetrofitClient
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
+import it.unical.demacs.fake_vinted_android.model.Favorites
 import it.unical.demacs.fake_vinted_android.model.Item
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,9 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _favorites = MutableStateFlow<Set<Favorites>>(emptySet())
+    val favorites: StateFlow<Set<Favorites>> = _favorites
 
     fun loadSingleItem(itemId: Long) {
         viewModelScope.launch {
@@ -109,6 +113,22 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
     fun getItemById(itemId: String): Item? {
         val itemIdLong = itemId.toLongOrNull() // Converte la stringa in Long?, restituisce null se la conversione fallisce
         return itemsInVendita.value.find { it.id == itemIdLong }
+    }
+
+    fun loadFavorites() {
+        viewModelScope.launch {
+            val token = sessionManager.getToken()
+            val user = apiService.getCurrentUser("Bearer $token", token)
+            if (token != null) {
+                val response = apiService.getFavorites("Bearer $token", user.body()?.id)
+                if (response.isSuccessful) {
+                    // Aggiorna il LiveData con l'elenco dei preferiti
+                    _favorites.value = response.body()?.toSet() ?: emptySet()
+                } else {
+                    // Gestisci l'errore
+                }
+            }
+        }
     }
 
 }
