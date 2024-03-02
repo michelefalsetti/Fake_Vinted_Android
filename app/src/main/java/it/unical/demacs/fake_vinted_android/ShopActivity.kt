@@ -141,6 +141,7 @@ fun ItemPreview(item: Item, navController: NavController,sessionManager: Session
     var isFavorited by remember { mutableStateOf(favorites.any { it.idprodotto == item.id }) }
     val coroutineScope = rememberCoroutineScope()
 
+
     Card(
         modifier = Modifier
             .padding(8.dp)
