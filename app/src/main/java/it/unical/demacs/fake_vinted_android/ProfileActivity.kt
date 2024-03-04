@@ -461,10 +461,12 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
         }
     }
 
-    Spacer(modifier = Modifier.padding(120.dp))
+    Spacer(modifier = Modifier.padding(100.dp))
     Button(onClick = { sessionManager.logout()
         navController.navigate(Routes.HOME.route)}) {
         Text( "Effettua il logout")
+
+
 
     }
 }

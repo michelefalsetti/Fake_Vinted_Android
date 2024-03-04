@@ -118,17 +118,25 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
     fun loadFavorites() {
         viewModelScope.launch {
             val token = sessionManager.getToken()
-            val user = apiService.getCurrentUser("Bearer $token", token)
             if (token != null) {
-                val response = apiService.getFavorites("Bearer $token", user.body()?.id)
-                if (response.isSuccessful) {
-                    // Aggiorna il LiveData con l'elenco dei preferiti
-                    _favorites.value = response.body()?.toSet() ?: emptySet()
+                val userResponse = apiService.getCurrentUser("Bearer $token", token)
+                if (userResponse.isSuccessful) {
+                    val userId = userResponse.body()?.id
+                    if (userId != null) {
+                        val response = apiService.getFavorites("Bearer $token", userId)
+                        if (response.isSuccessful) {
+                            // Aggiorna il LiveData con l'elenco dei preferiti
+                            _favorites.value = response.body()?.toSet() ?: emptySet()
+                        } else {
+                            // Gestisci l'errore
+                        }
+                    } else {
+                        // L'ID utente è null, gestisci questo caso
+                    }
                 } else {
-                    // Gestisci l'errore
+                    // La chiamata per ottenere l'utente corrente non è andata a buon fine, gestisci questo caso
                 }
             }
         }
     }
-
 }
