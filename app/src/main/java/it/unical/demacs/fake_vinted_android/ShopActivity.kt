@@ -136,11 +136,21 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
     }
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun ItemPreview(item: Item, navController: NavController,sessionManager: SessionManager, apiService: ApiService, favorites: Set<Favorites>) {
-    var isFavorited by remember { mutableStateOf(favorites.any { it.idprodotto == item.id }) }
+    var isFavorited by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val token = sessionManager.getToken()
+    val apiService = RetrofitClient.create(sessionManager,context)
 
+    coroutineScope.launch {
+        val user = apiService.getCurrentUser("Bearer $token",token)
+        val res = apiService.getFavorites("Bearer $token", user.body()?.id)
+        isFavorited = res.isSuccessful && res.body()?.any { it.idprodotto== item.id } ?: false
+    }
 
     Card(
         modifier = Modifier
