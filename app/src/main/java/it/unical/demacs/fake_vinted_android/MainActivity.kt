@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
             val sessionManager = SessionManager(LocalContext.current)
             val isDarkTheme = remember { mutableStateOf(sessionManager.isDarkTheme()) }
 
-            Fake_Vinted_AndroidTheme(isDarkTheme.value) {
+            Fake_Vinted_AndroidTheme(darkTheme =  isDarkTheme.value) {
                 val isLogged = remember { mutableStateOf(false) }
                 val navController = rememberNavController()
                 val context = LocalContext.current
@@ -129,9 +129,10 @@ fun MainPage( navController: NavHostController) {
             Text(
                 fontFamily = FontFamily.Monospace,
                 text = "Per continuare ad usare l'app è necessario eseguire l'accesso.",
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
+
             )
             Spacer(modifier = Modifier.padding(vertical = 10.dp))
 
