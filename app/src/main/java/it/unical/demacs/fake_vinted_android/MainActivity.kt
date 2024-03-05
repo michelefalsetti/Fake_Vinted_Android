@@ -73,7 +73,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Fake_Vinted_AndroidTheme {
+            val sessionManager = SessionManager(LocalContext.current)
+            val isDarkTheme = remember { mutableStateOf(sessionManager.isDarkTheme()) }
+
+            Fake_Vinted_AndroidTheme(isDarkTheme.value) {
                 val isLogged = remember { mutableStateOf(false) }
                 val navController = rememberNavController()
                 val context = LocalContext.current
@@ -324,6 +327,8 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
 
 
 }
+
+
 
 
 

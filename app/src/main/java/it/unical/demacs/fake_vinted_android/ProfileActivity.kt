@@ -1,6 +1,7 @@
 package it.unical.demacs.fake_vinted_android
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
@@ -40,6 +41,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -59,6 +62,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.recreate
 import androidx.navigation.NavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
@@ -77,6 +81,13 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
     val saldoState by userViewModel.saldo.collectAsState()
 
     val user = userState
+
+    val isDarkTheme = remember { mutableStateOf(sessionManager.isDarkTheme()) }
+    val toggleTheme = {
+        val newThemeState = !isDarkTheme.value
+        isDarkTheme.value = newThemeState
+        sessionManager.saveThemePreference(newThemeState)
+    }
 
     LaunchedEffect(key1 = true) {
         userViewModel.getCurrentUser()
@@ -120,7 +131,8 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                saldoState?.let { DisplayUserInfo(user = user, saldo = it,apiService,sessionManager, navController = navController) }
+                saldoState?.let { DisplayUserInfo(user = user, saldo = it,apiService,sessionManager, navController = navController, isDarkTheme = isDarkTheme,
+                    toggleTheme = toggleTheme ) }
             }
         }
     }
@@ -131,7 +143,8 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @Composable
-fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sessionManager: SessionManager, navController: NavController) {
+fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sessionManager: SessionManager, navController: NavController, isDarkTheme: MutableState<Boolean>, // Aggiunto per gestire lo stato del tema
+                    toggleTheme: () -> Unit ) {
     val token = sessionManager.getToken()
     val itemsAcquistati = remember { mutableListOf<Item>() }
     val itemsPreferiti = remember { mutableStateOf<List<Item>>(emptyList()) }
@@ -459,6 +472,10 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet , apiService: ApiService,sess
                 }
             }
         }
+    }
+
+    Button(onClick = { toggleTheme() }) {
+        Text("Cambia Tema")
     }
 
     Spacer(modifier = Modifier.padding(100.dp))

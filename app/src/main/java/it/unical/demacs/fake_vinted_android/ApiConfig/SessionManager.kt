@@ -55,4 +55,12 @@ class SessionManager(context: Context) {
         editor.apply()
     }
 
+    fun saveThemePreference(isDarkTheme: Boolean) {
+        editor.putBoolean("dark_theme", isDarkTheme).apply()
+    }
+
+    fun isDarkTheme(): Boolean {
+        return sharedPreferences.getBoolean("dark_theme", false) // Default è false per il tema chiaro
+    }
+
 }
