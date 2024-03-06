@@ -156,16 +156,17 @@ fun MainPage( navController: NavHostController) {
     }
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,addressFormViewModel: AddressFormViewModel,userFormVIewModel : UserFormViewModel, apiService: ApiService, sessionManager: SessionManager, navController: NavHostController, isLogged: MutableState<Boolean>) {
-    val context = LocalContext.current
-    val sessionManager = remember { SessionManager(context) }
-    val token = sessionManager.getToken()
 
+    val user=userViewModel.user.value
     LaunchedEffect(key1 = true) {
-        if(token!=null) {
-            itemViewModel.loadFavorites()
-            itemViewModel.fetchItemsInVendita()
+        if (user != null) {
+            if(user.id !=null) {
+                itemViewModel.loadFavorites()
+                itemViewModel.fetchItemsInVendita()
+            }
         }
     }
     NavHost(navController = navController, startDestination = Routes.HOME.route) {
