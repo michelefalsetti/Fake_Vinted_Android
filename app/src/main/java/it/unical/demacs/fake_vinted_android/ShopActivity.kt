@@ -91,8 +91,10 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
     var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = true) {
-        itemViewModel.loadFavorites()
-        itemViewModel.fetchItemsInVendita()
+        if(token!=null) {
+            itemViewModel.loadFavorites()
+            itemViewModel.fetchItemsInVendita()
+        }
     }
 
 
@@ -187,9 +189,11 @@ fun ItemPreview(item: Item, navController: NavController, sessionManager: Sessio
     val token = sessionManager.getToken()
 
     coroutineScope.launch {
-        val user = apiService.getCurrentUser("Bearer $token",token)
-        val res = apiService.getFavorites("Bearer $token", user.body()?.id)
-        isFavorited = res.isSuccessful && res.body()?.any { it.idprodotto== item.id } ?: false
+            val user = apiService.getCurrentUser("Bearer $token", token)
+            if(user.body()?.id != null){
+            val res = apiService.getFavorites("Bearer $token", user.body()?.id)
+            isFavorited = res.isSuccessful && res.body()?.any { it.idprodotto == item.id } ?: false
+            }
     }
 
     LaunchedEffect(item) {

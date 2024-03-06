@@ -158,9 +158,15 @@ fun MainPage( navController: NavHostController) {
 
 @Composable
 fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,addressFormViewModel: AddressFormViewModel,userFormVIewModel : UserFormViewModel, apiService: ApiService, sessionManager: SessionManager, navController: NavHostController, isLogged: MutableState<Boolean>) {
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val token = sessionManager.getToken()
+
     LaunchedEffect(key1 = true) {
-        itemViewModel.loadFavorites()
-        itemViewModel.fetchItemsInVendita()
+        if(token!=null) {
+            itemViewModel.loadFavorites()
+            itemViewModel.fetchItemsInVendita()
+        }
     }
     NavHost(navController = navController, startDestination = Routes.HOME.route) {
         composable(Routes.HOME.route) {
