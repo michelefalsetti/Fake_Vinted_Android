@@ -478,7 +478,7 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sess
         Text("Cambia Tema")
     }
 
-    Spacer(modifier = Modifier.padding(100.dp))
+    Spacer(modifier = Modifier.padding(80.dp))
     Button(onClick = { sessionManager.logout()
         navController.navigate(Routes.HOME.route)}) {
         Text( "Effettua il logout")
