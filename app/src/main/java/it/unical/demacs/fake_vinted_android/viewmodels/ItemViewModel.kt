@@ -34,6 +34,7 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
     private val _favorites = MutableStateFlow<Set<Favorites>>(emptySet())
     val favorites: StateFlow<Set<Favorites>> = _favorites
 
+
     fun loadSingleItem(itemId: Long) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -108,9 +109,20 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
         }
     }
 
+    fun sortItemsByPrice(descending: Boolean) {
+        val currentItems = _itemsInVendita.value.toMutableList()
+        currentItems.sortBy { it.prezzo }
+        if (descending) {
+            currentItems.reverse()
+        }
+        _itemsInVendita.value = currentItems
+    }
 
 
-    fun getItemById(itemId: String): Item? {
+
+
+
+fun getItemById(itemId: String): Item? {
         val itemIdLong = itemId.toLongOrNull() // Converte la stringa in Long?, restituisce null se la conversione fallisce
         return itemsInVendita.value.find { it.id == itemIdLong }
     }

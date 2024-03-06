@@ -28,6 +28,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -82,16 +85,16 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
     val context = LocalContext.current
     val sessionManager = remember { SessionManager(context) }
     val token = sessionManager.getToken()
-    val apiService = RetrofitClient.create(sessionManager,context)
+    val apiService = RetrofitClient.create(sessionManager, context)
     val favorites by itemViewModel.favorites.collectAsState()
-
-
+    var orderByPriceDesc by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = true) {
         itemViewModel.loadFavorites()
         itemViewModel.fetchItemsInVendita()
-
     }
+
 
     Scaffold(
         bottomBar = {
@@ -110,46 +113,86 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
                         Icon(Icons.Default.Add, contentDescription = null)
                     }
                     IconButton(onClick = { navController.navigate(Routes.NOTIFICATION.route) }) {
-                        Icon(
-                            Icons.Default.Email, contentDescription = null,
-                        )
+                        Icon(Icons.Default.Email, contentDescription = null)
                     }
                     IconButton(onClick = { navController.navigate(Routes.PROFILE.route) }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = null)}
-                    // ... Altri IconButton per le altre voci della BottomAppBar ...
+                        Icon(Icons.Default.AccountCircle, contentDescription = null)
+                    }
                 }
             }
         }
-    ) {innerPadding ->
-        LazyColumn(
+    ) { innerPadding ->
 
-            modifier = Modifier.padding(16.dp),
-            contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding())
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(end = 16.dp)
+            ) {
+                Button(onClick = { expanded = !expanded }) {
+                    Text("Filtra")
+                }
 
-        )
-            {
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                ) {
 
-            items(items) { item ->
-                ItemPreview(item,navController,sessionManager,apiService, favorites)
+                    DropdownMenuItem(text ={ Text(text = "Ordina per: prezzo crescente")},
+                        onClick = {
+                            orderByPriceDesc = false
+                            itemViewModel.sortItemsByPrice(orderByPriceDesc)
+                            expanded = false
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text ={Text(text = "Ordina per: prezzo decrescente")},
+                        onClick = {
+                            orderByPriceDesc = true
+                            itemViewModel.sortItemsByPrice(orderByPriceDesc)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding())
+            ) {
+                items(items) { item ->
+                    ItemPreview(item, navController, sessionManager, apiService, favorites)
+                }
             }
         }
     }
 }
 
-@SuppressLint("CoroutineCreationDuringComposition")
+
+
 @Composable
-fun ItemPreview(item: Item, navController: NavController,sessionManager: SessionManager, apiService: ApiService, favorites: Set<Favorites>) {
+fun ItemPreview(item: Item, navController: NavController, sessionManager: SessionManager, apiService: ApiService, favorites: Set<Favorites>) {
     var isFavorited by remember { mutableStateOf(false) }
+    var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val sessionManager = remember { SessionManager(context) }
     val token = sessionManager.getToken()
-    val apiService = RetrofitClient.create(sessionManager,context)
 
-    coroutineScope.launch {
-        val user = apiService.getCurrentUser("Bearer $token",token)
-        val res = apiService.getFavorites("Bearer $token", user.body()?.id)
-        isFavorited = res.isSuccessful && res.body()?.any { it.idprodotto== item.id } ?: false
+    LaunchedEffect(item) {
+        val imageUrl = item.immagini
+        if (imageUrl != null) {
+            val decodedBytes = Base64.decode(imageUrl.substringAfter(','), Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+            imageBitmap = bitmap.asImageBitmap()
+        }
     }
 
     Card(
@@ -163,13 +206,9 @@ fun ItemPreview(item: Item, navController: NavController,sessionManager: Session
         elevation = CardDefaults.cardElevation()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            item.immagini?.let { imageUrl ->
-                val imageBitmap = remember {
-                    val decodedBytes = Base64.decode(imageUrl.substringAfter(','), Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                }
+            imageBitmap?.let { bitmap ->
                 Image(
-                    bitmap = imageBitmap.asImageBitmap(),
+                    bitmap = bitmap,
                     contentDescription = "Immagine Prodotto",
                     modifier = Modifier
                         .height(300.dp)
@@ -178,9 +217,9 @@ fun ItemPreview(item: Item, navController: NavController,sessionManager: Session
                         .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop
                 )
-
             }
-            Text(item.nome, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),modifier = Modifier
+
+            Text(item.nome, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
                 textAlign = TextAlign.Center)
@@ -203,22 +242,9 @@ fun ItemPreview(item: Item, navController: NavController,sessionManager: Session
 
                 IconButton(onClick = {
                     coroutineScope.launch {
-                        val token = sessionManager.getToken()
                         val user = apiService.getCurrentUser("Bearer $token", token)
-                        if (token != null) {
-                            val response = if (isFavorited) {
-                                // Chiama API per rimuovere dai preferiti
-                                apiService.removeFromFavorites("Bearer $token", user.body()?.id, item.id)
-                            } else {
-                                // Chiama API per aggiungere ai preferiti
-                                apiService.addFavorite("Bearer $token", user.body()?.id, item.id)
-                            }
-
-                            if (response.isSuccessful) {
-                                isFavorited = !isFavorited // Aggiorna lo stato dei preferiti
-                            } else {
-                            }
-                            }
+                        val res = apiService.getFavorites("Bearer $token", user.body()?.id)
+                        isFavorited = res.isSuccessful && res.body()?.any { it.idprodotto == item.id } ?: false
                     }
                 }) {
                     Icon(
@@ -227,9 +253,11 @@ fun ItemPreview(item: Item, navController: NavController,sessionManager: Session
                         tint = if (isFavorited) Color.Red else Color.Gray
                     )
                 }
-            }}
+            }
+        }
     }
 }
+
 
 
 @Composable
