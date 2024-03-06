@@ -163,11 +163,13 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,ad
     val user=userViewModel.user.value
     LaunchedEffect(key1 = true) {
         if (user != null) {
-            if(user.id !=null) {
+            if (user.id != null) {
                 itemViewModel.loadFavorites()
-                itemViewModel.fetchItemsInVendita()
             }
         }
+        itemViewModel.fetchItemsInVendita()
+
+
     }
     NavHost(navController = navController, startDestination = Routes.HOME.route) {
         composable(Routes.HOME.route) {
