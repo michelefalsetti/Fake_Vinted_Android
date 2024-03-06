@@ -150,8 +150,7 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @Composable
-fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sessionManager: SessionManager, navController: NavController, isDarkTheme: MutableState<Boolean>, // Aggiunto per gestire lo stato del tema
-                    toggleTheme: () -> Unit ) {
+fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sessionManager: SessionManager, navController: NavController, isDarkTheme: MutableState<Boolean>, toggleTheme: () -> Unit ) {
     val token = sessionManager.getToken()
     val itemsAcquistati = remember { mutableListOf<Item>() }
     val itemsPreferiti = remember { mutableStateOf<List<Item>>(emptyList()) }

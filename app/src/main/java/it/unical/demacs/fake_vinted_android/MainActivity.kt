@@ -66,6 +66,7 @@ import it.unical.demacs.fake_vinted_android.viewmodels.AddressFormViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.ItemViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserFormViewModel
 import it.unical.demacs.fake_vinted_android.viewmodels.UserViewModel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -74,8 +75,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val coroutineScope = rememberCoroutineScope()
             val sessionManager = SessionManager(LocalContext.current)
             val isDarkTheme = remember { mutableStateOf(sessionManager.isDarkTheme()) }
+
+
 
             Fake_Vinted_AndroidTheme(darkTheme =  isDarkTheme.value) {
                 val isLogged = remember { mutableStateOf(false) }
@@ -104,6 +108,12 @@ class MainActivity : ComponentActivity() {
 
                     )
                 }
+
+                sessionManager.addThemeChangeListener {
+                   coroutineScope.launch {
+
+                        recreate()
+                    }
 
             }
         }
@@ -261,8 +271,8 @@ fun SearchPage(itemViewModel: ItemViewModel, apiService: ApiService, sessionMana
                 }
             }
         }
-    ) {innerpadding ->
-        Column{
+    ) { innerpadding ->
+        Column {
 
             TextField(
                 value = value,
@@ -325,9 +335,8 @@ fun SearchPage(itemViewModel: ItemViewModel, apiService: ApiService, sessionMana
 
         }
 
-
     }
-
+}
 
 }
 

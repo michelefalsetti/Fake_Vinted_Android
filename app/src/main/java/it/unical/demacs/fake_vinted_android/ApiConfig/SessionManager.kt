@@ -55,8 +55,20 @@ class SessionManager(context: Context) {
         editor.apply()
     }
 
+    private val themeChangeListeners = mutableListOf<() -> Unit>()
+
+    fun addThemeChangeListener(listener: () -> Unit) {
+        themeChangeListeners.add(listener)
+    }
+
+
+    private fun notifyThemeChange() {
+        themeChangeListeners.forEach { it.invoke() }
+    }
+
     fun saveThemePreference(isDarkTheme: Boolean) {
         editor.putBoolean("dark_theme", isDarkTheme).apply()
+        notifyThemeChange() // Aggiorna tutti i listener quando il tema cambia
     }
 
     fun isDarkTheme(): Boolean {
