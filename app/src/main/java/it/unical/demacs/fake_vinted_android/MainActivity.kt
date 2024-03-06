@@ -37,6 +37,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -207,7 +208,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,ad
 
 
         composable(Routes.SEARCH.route){
-            SearchPage(apiService = apiService, sessionManager = sessionManager, navController =navController )
+            SearchPage(itemViewModel, apiService = apiService, sessionManager = sessionManager, navController =navController )
         }
 
         composable(Routes.NOTIFICATION.route){
@@ -221,13 +222,14 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,ad
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navController: NavHostController) {
+fun SearchPage(itemViewModel: ItemViewModel, apiService: ApiService, sessionManager: SessionManager, navController: NavHostController) {
     val token = sessionManager.getToken()
     val searchResult = remember { mutableListOf<Item>() }
     val coroutineScope = rememberCoroutineScope()
     val showResult = remember { mutableStateOf(false) }
     val showError = remember { mutableStateOf(false) }
     var value by rememberSaveable { mutableStateOf("") }
+    val favorites by itemViewModel.favorites.collectAsState()
 
 
 
@@ -298,7 +300,7 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                 singleLine = true,
                 placeholder = { Text(text = "Cerca i prodotti!") }
             )
-            /*if (showResult.value) {
+            if (showResult.value) {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -319,7 +321,7 @@ fun SearchPage(apiService: ApiService, sessionManager: SessionManager, navContro
                 }
 
 
-            }*/
+            }
 
         }
 
