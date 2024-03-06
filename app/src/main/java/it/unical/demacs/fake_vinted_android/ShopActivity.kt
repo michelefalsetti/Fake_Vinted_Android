@@ -177,14 +177,20 @@ fun HomePage(itemViewModel: ItemViewModel, navController: NavHostController) {
 
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun ItemPreview(item: Item, navController: NavController, sessionManager: SessionManager, apiService: ApiService, favorites: Set<Favorites>) {
     var isFavorited by remember { mutableStateOf(false) }
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
-
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val token = sessionManager.getToken()
+
+    coroutineScope.launch {
+        val user = apiService.getCurrentUser("Bearer $token",token)
+        val res = apiService.getFavorites("Bearer $token", user.body()?.id)
+        isFavorited = res.isSuccessful && res.body()?.any { it.idprodotto== item.id } ?: false
+    }
 
     LaunchedEffect(item) {
         val imageUrl = item.immagini
@@ -242,9 +248,22 @@ fun ItemPreview(item: Item, navController: NavController, sessionManager: Sessio
 
                 IconButton(onClick = {
                     coroutineScope.launch {
+                        val token = sessionManager.getToken()
                         val user = apiService.getCurrentUser("Bearer $token", token)
-                        val res = apiService.getFavorites("Bearer $token", user.body()?.id)
-                        isFavorited = res.isSuccessful && res.body()?.any { it.idprodotto == item.id } ?: false
+                        if (token != null) {
+                            val response = if (isFavorited) {
+                                // Chiama API per rimuovere dai preferiti
+                                apiService.removeFromFavorites("Bearer $token", user.body()?.id, item.id)
+                            } else {
+                                // Chiama API per aggiungere ai preferiti
+                                apiService.addFavorite("Bearer $token", user.body()?.id, item.id)
+                            }
+
+                            if (response.isSuccessful) {
+                                isFavorited = !isFavorited // Aggiorna lo stato dei preferiti
+                            } else {
+                            }
+                        }
                     }
                 }) {
                     Icon(
