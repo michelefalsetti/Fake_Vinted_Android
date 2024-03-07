@@ -28,13 +28,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -45,6 +50,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -63,10 +70,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.SemanticsProperties.ImeAction
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat.recreate
@@ -148,6 +157,7 @@ fun ProfilePage(userViewModel: UserViewModel,navController: NavController, apiSe
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @Composable
 fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sessionManager: SessionManager, navController: NavController, isDarkTheme: MutableState<Boolean>, toggleTheme: () -> Unit ) {
@@ -489,10 +499,130 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sess
         }
     }
 
+    var isDialogVisible by remember { mutableStateOf(false) }
+    var feedbackText by remember { mutableStateOf("") }
+    var showThanksDialog by remember { mutableStateOf(false) }
+    var showErrorDialog by remember { mutableStateOf(false) }
+
+    Column {
+        Button(
+            onClick = { isDialogVisible = true },
+            modifier = Modifier.padding(8.dp)
+                .fillMaxWidth()
+        ) {
+            Text("Lasciaci il tuo feedback!")
+        }
+
+        if (isDialogVisible) {
+            AlertDialog(
+                onDismissRequest = {
+                    isDialogVisible = false
+                },
+                text = {
+                    Column {
+                        Text("Inserisci il tuo feedback")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextField(
+                            value = feedbackText,
+                            onValueChange = { feedbackText = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = androidx.compose.ui.text.input.ImeAction.Done,
+                                keyboardType = KeyboardType.Text
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    if (feedbackText.isNotBlank()) {
+                                        coroutineScope.launch {
+                                            apiService.addFeedback("Bearer $token", user.id, feedbackText)
+                                            showThanksDialog = true
+                                        }
+                                        isDialogVisible = false
+                                    } else {
+                                        showErrorDialog = true
+                                    }
+                                }
+                            )
+                        )
+                    }
+                },
+                confirmButton = {
+                    IconButton(
+                        onClick = {
+                            if (feedbackText.isNotBlank()) {
+                                coroutineScope.launch {
+                                    apiService.addFeedback("Bearer $token", user.id, feedbackText)
+                                    showThanksDialog = true
+                                }
+                                isDialogVisible = false
+                            } else {
+                                showErrorDialog = true
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Send, contentDescription = null)
+                    }
+                },
+                dismissButton = {
+                    IconButton(
+                        onClick = {
+                            isDialogVisible = false
+                        }
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = null)
+                    }
+                }
+            )
+        }
+
+        if (showErrorDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showErrorDialog = false
+                },
+                title = {
+                    Text("Errore")
+                },
+                text = {
+                    Text("Il campo di feedback non può essere vuoto.")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showErrorDialog = false
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+
+        if (showThanksDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showThanksDialog = false
+                },
+                title = {
+                    Text("Grazie per il tuo feedback!")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showThanksDialog = false
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+    }
 
 
 
-    Spacer(modifier = Modifier.padding(70.dp))
+
+    Spacer(modifier = Modifier.padding(30.dp))
     Button(onClick = { sessionManager.logout()
         navController.navigate(Routes.HOME.route)}) {
         Text( "Effettua il logout")

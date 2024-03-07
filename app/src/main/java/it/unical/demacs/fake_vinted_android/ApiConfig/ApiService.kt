@@ -132,6 +132,14 @@ interface ApiService {
         @Path("idprodotto") idprodotto: Long?
     ): Response<Unit>
 
+    @FormUrlEncoded
+    @POST("/api/v2/addFeedback")
+    suspend fun addFeedback(
+        @Header("Authorization") token: String?,
+        @Field("idutente") idutente: Long?,
+        @Field("feedback") feedback: String?
+    ): Response<Unit>
+
 
 
 }
