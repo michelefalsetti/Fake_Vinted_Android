@@ -349,6 +349,19 @@ fun ItemContent(item: Item, navController: NavController,sessionManager: Session
             textAlign = TextAlign.Center
         )
 
+        val usernameText = buildAnnotatedString {
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Venditore: ")
+            }
+            append(item.nomeutente)
+        }
+
+        Text(
+            text = usernameText,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(horizontal = 16.dp,  vertical = 10.dp)
+        )
+
         val annotatedText = buildAnnotatedString {
             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                 append("Descrizione: ")

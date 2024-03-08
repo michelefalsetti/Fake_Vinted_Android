@@ -14,6 +14,7 @@ data class Item(
     val dataCreazione: List<Int>?,
     val stato: String,
     val idUtente: Long?,
+    val nomeutente: String?,
     var immagini: String?,
     var categoria: String,
     var condizioni: String
