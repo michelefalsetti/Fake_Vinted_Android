@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat.recreate
 import androidx.navigation.NavController
 import it.unical.demacs.fake_vinted_android.ApiConfig.ApiService
 import it.unical.demacs.fake_vinted_android.ApiConfig.SessionManager
@@ -142,10 +144,10 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
                                 .clickable {
                                     navController.navigate(Routes.OFFER.route)
                                 }
-                                .align(Alignment.CenterVertically) // Centra il testo verticalmente
+                                .align(Alignment.CenterVertically)
                                 .padding(8.dp),
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            textAlign = TextAlign.Center  // Centra il testo orizzontalmente
+                            textAlign = TextAlign.Center
                         )
                     }
                 },
@@ -158,7 +160,7 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
 
                 if (notificationResult.isNotEmpty()) {
                     LazyColumn(
-                        contentPadding = PaddingValues(bottom = innerpadding.calculateBottomPadding(),top = innerpadding.calculateTopPadding()),
+                       contentPadding = PaddingValues(top = innerpadding.calculateTopPadding(),bottom = innerpadding.calculateBottomPadding() + 90.dp),
                         modifier = Modifier
                             .fillMaxSize()
 
@@ -205,13 +207,17 @@ fun NotificationPage(apiService: ApiService, sessionManager: SessionManager,navC
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navController: NavController) {
+fun OfferPage(apiService: ApiService, sessionManager: SessionManager, navController: NavController) {
     val token = sessionManager.getToken()
     var offerResult by remember { mutableStateOf<List<Offer>>(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(token) {
-        if (offerResult.isEmpty()) {
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogMessage by remember { mutableStateOf("") }
+    var updatePage by remember { mutableStateOf(false) }
+
+    LaunchedEffect(token, updatePage) {
+        if (offerResult.isEmpty() || updatePage) {
             val user = apiService.getCurrentUser("Bearer $token", token)
             val res = user.body()?.let { apiService.getOffersByUserId("Bearer $token", it.id) }
             if (res != null) {
@@ -220,8 +226,11 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
             if (res != null) {
                 Log.d("offerte", res.body().toString())
             }
+
+            updatePage = false
         }
     }
+
     Scaffold(
         bottomBar = {
             BottomAppBar {
@@ -291,10 +300,10 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                                 .clickable {
                                     navController.navigate(Routes.OFFER.route)
                                 }
-                                .align(Alignment.CenterVertically) // Centra il testo verticalmente
+                                .align(Alignment.CenterVertically)
                                 .padding(8.dp),
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            textAlign = TextAlign.Center  // Centra il testo orizzontalmente
+                            textAlign = TextAlign.Center
                         )
                     }
                 },
@@ -309,7 +318,7 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                 if (offerResult.isNotEmpty()) {
                     LazyColumn(
                         contentPadding = PaddingValues(
-                            bottom = innerpadding.calculateBottomPadding(),
+                            bottom = innerpadding.calculateBottomPadding() + 90.dp,
                             top = innerpadding.calculateTopPadding()
                         ),
                         modifier = Modifier
@@ -344,13 +353,17 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                                                                 "Bearer $token",
                                                                 token,
                                                                 it,
-                                                                "la tua offerta è stata accettata, hai acquistato l'articolo ${offer.nomeprodotto}!"
+                                                                "La tua offerta è stata accettata, hai acquistato l'articolo ${offer.nomeprodotto}!"
                                                             )
                                                         }
 
                                                         offer.idproprietario?.let {
-                                                            apiService.addUserNotification("Bearer $token",token,
-                                                                it,"L'utente ${offer.usernameutenteofferente} ha acquistato il tuo prodotto ${offer.nomeprodotto}!" )
+                                                            apiService.addUserNotification(
+                                                                "Bearer $token",
+                                                                token,
+                                                                it,
+                                                                "L'utente ${offer.usernameutenteofferente} ha acquistato il tuo prodotto ${offer.nomeprodotto}!"
+                                                            )
                                                         }
                                                         val prezzototale = offer.offerta?.plus(2.99)
                                                         apiService.buyItem(
@@ -365,9 +378,10 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                                                                 "Bearer $token",
                                                                 it
                                                             )
-                                                            deletedOfferId =
-                                                                it
+                                                            deletedOfferId = it
                                                         }
+                                                        showDialog = true
+                                                        dialogMessage = "Hai accettato l'offerta!"
                                                     }
                                                 },
                                                 modifier = Modifier
@@ -386,7 +400,7 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                                                                 "Bearer $token",
                                                                 token,
                                                                 it,
-                                                                "la tua offerta per l'articolo ${offer.nomeprodotto} è stata rifiutata, ci dispiace!"
+                                                                "La tua offerta per l'articolo ${offer.nomeprodotto} è stata rifiutata, ci dispiace!"
                                                             )
                                                         }
                                                         offer.idprodotto?.let {
@@ -394,9 +408,10 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
                                                                 "Bearer $token",
                                                                 it
                                                             )
-                                                            deletedOfferId =
-                                                                it
+                                                            deletedOfferId = it
                                                         }
+                                                        showDialog = true
+                                                        dialogMessage = "Hai rifiutato l'offerta!"
                                                     }
                                                 },
                                                 modifier = Modifier
@@ -425,8 +440,25 @@ fun OfferPage(apiService: ApiService, sessionManager: SessionManager,navControll
             }
         }
     }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDialog = false
+            },
+            title = {
+                Text(text = dialogMessage)
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        updatePage = true
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            }
+        )
+    }
 }
-
-
-
-
