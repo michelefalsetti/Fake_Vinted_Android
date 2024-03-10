@@ -281,7 +281,7 @@ fun LoginPage(navController: NavController, apiService: ApiService, sessionManag
     val coroutineScope = rememberCoroutineScope()
     val nicknameState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
-    val loginError by remember { mutableStateOf(false) }
+    val loginError = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -298,8 +298,8 @@ fun LoginPage(navController: NavController, apiService: ApiService, sessionManag
         InputField(name = stringResource(R.string.login_password), modifier = Modifier, passwordState)
 
 
-        if (loginError) {
-            Text("Login fallito. Riprova.", color = MaterialTheme.colorScheme.error)
+        if (loginError.value) {
+            Text("Username o password errati. Riprova.", color = MaterialTheme.colorScheme.error)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -320,7 +320,11 @@ fun LoginPage(navController: NavController, apiService: ApiService, sessionManag
                             sessionManager.saveUsername(username)
                             isLogged.value = true
                             navController.navigate(Routes.FIRSTPAGE.route)
+                        } else{
+                            loginError.value = true
                         }
+
+
 
                     } catch (e: Exception) {
                         // Si è verificato un errore durante la chiamata API
