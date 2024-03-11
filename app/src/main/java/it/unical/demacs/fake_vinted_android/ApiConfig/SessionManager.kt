@@ -68,11 +68,9 @@ class SessionManager(context: Context) {
 
     fun saveThemePreference(isDarkTheme: Boolean) {
         editor.putBoolean("dark_theme", isDarkTheme).apply()
-        notifyThemeChange() // Aggiorna tutti i listener quando il tema cambia
-    }
+        notifyThemeChange()     }
 
     fun isDarkTheme(): Boolean {
-        return sharedPreferences.getBoolean("dark_theme", false) // Default è false per il tema chiaro
-    }
+        return sharedPreferences.getBoolean("dark_theme", false)     }
 
 }

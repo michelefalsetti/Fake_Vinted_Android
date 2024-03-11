@@ -96,8 +96,7 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
 
     val reducedPaddingModifier = Modifier
         .fillMaxWidth()
-        .padding(horizontal = 20.dp, vertical = 5.dp) // Riduci il padding verticale
-
+        .padding(horizontal = 20.dp, vertical = 5.dp)
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             imageUri = uri
@@ -166,8 +165,7 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp)) // Spazio tra i campi di input e il primo Button
-
+                Spacer(modifier = Modifier.height(16.dp))
                 InputField(
                     name = stringResource(R.string.item_title),
                     reducedPaddingModifier,
@@ -329,8 +327,7 @@ fun AddItem(navHostController: NavHostController, apiService: ApiService, sessio
         }
     }
 
-    // Aggiungi i dialoghi di successo, insuccesso e campi vuoti
-    if (successDialogVisible) {
+        if (successDialogVisible) {
         AlertDialog(
             onDismissRequest = { successDialogVisible = false },
             title = {
@@ -442,8 +439,7 @@ fun InputField(name: String, modifier: Modifier, fieldState: MutableState<String
     val passName = stringResource(R.string.login_password)
 
     Row(horizontalArrangement = Arrangement.Center) {
-        if (name == passName) { // ATTENZIONE!!!!! MODIFICARE QUANDO IMPLEMENTIAMO LOGIN
-            TextField(
+        if (name == passName) {             TextField(
                 value = fieldState.value,
                 onValueChange = { newValue ->
                     fieldState.value = newValue

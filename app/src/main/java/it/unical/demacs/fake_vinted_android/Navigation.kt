@@ -15,8 +15,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Routes(val route: String, val icon: ImageVector, val stringName: Int) {
-    // ... altre voci ...
-    HOME("home", Icons.Default.Home, R.string.home),
+        HOME("home", Icons.Default.Home, R.string.home),
     FIRSTPAGE("firstPage", Icons.Default.Home,R.string.firstpage),
     ADDITEM("addItem", Icons.Default.Add, R.string.add_item),
     LOGIN("login", Icons.Default.Person, R.string.login),

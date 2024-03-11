@@ -263,7 +263,6 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sess
         val saldo1 = saldo.saldo
         val formato = "%.2f"
         val risultatoFormattato = String.format(formato, saldo1)
-        // Utilizza il saldo del Wallet se non è null, altrimenti mostra "Non disponibile"
         append(if (saldo != null) "${risultatoFormattato} €" else "Non disponibile")
     }
 
@@ -275,8 +274,7 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sess
         Card {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth() // Fai espandere la Row su tutta la larghezza
-            ) {
+                modifier = Modifier.fillMaxWidth()             ) {
                 Image(
                     painter = painterResource(id = R.drawable.icon),
                     contentDescription = "icona",
@@ -287,8 +285,7 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sess
                 Spacer(Modifier.width(8.dp))
 
                 Column(
-                    modifier = Modifier.fillMaxWidth() // Fai espandere la Column su tutta la larghezza
-                ) {
+                    modifier = Modifier.fillMaxWidth()                 ) {
                     Text(
                         text = usernameText,
                         style = MaterialTheme.typography.headlineLarge,
@@ -306,8 +303,7 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sess
         }
     }
 
-    Spacer(modifier = Modifier.height(20.dp)) // Regola questo valore per modificare lo spazio verticale
-
+    Spacer(modifier = Modifier.height(20.dp))
     var datiEspanso by remember { mutableStateOf(false) }
     var indirizzoEspanso by remember { mutableStateOf(false) }
     var storicoEspanso by remember { mutableStateOf(false) }
@@ -316,8 +312,7 @@ fun DisplayUserInfo(user: UtenteDTO, saldo: Wallet, apiService: ApiService, sess
     Column {
         Row(
             modifier = Modifier
-                .fillMaxWidth(), // Si estende per tutta la larghezza dello schermo
-            horizontalArrangement = Arrangement.End // Allinea il contenuto alla fine (destra)
+                .fillMaxWidth(),             horizontalArrangement = Arrangement.End // Allinea il contenuto alla fine (destra)
         ) {
             ThemeSwitchButton(isDarkTheme = isDarkTheme, toggleTheme = toggleTheme)
         }

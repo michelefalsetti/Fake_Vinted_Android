@@ -197,8 +197,7 @@ fun NavigationView(itemViewModel: ItemViewModel, userViewModel: UserViewModel,ad
 
 
         composable(Routes.ADDITEM.route) {
-            AddItem(navController,apiService,sessionManager,navController) // La composable per aggiungere un articolo
-        }
+            AddItem(navController,apiService,sessionManager,navController)         }
         composable(Routes.PROFILE.route) {
             ProfilePage(userViewModel = userViewModel, navController = navController, apiService = apiService,sessionManager=sessionManager)
         }

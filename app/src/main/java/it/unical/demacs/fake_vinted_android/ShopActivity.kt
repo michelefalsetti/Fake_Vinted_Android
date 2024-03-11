@@ -256,16 +256,13 @@ fun ItemPreview(item: Item, navController: NavController, sessionManager: Sessio
                         val user = apiService.getCurrentUser("Bearer $token", token)
                         if (token != null) {
                             val response = if (isFavorited) {
-                                // Chiama API per rimuovere dai preferiti
-                                apiService.removeFromFavorites("Bearer $token", user.body()?.id, item.id)
+                                                                apiService.removeFromFavorites("Bearer $token", user.body()?.id, item.id)
                             } else {
-                                // Chiama API per aggiungere ai preferiti
-                                apiService.addFavorite("Bearer $token", user.body()?.id, item.id)
+                                                                apiService.addFavorite("Bearer $token", user.body()?.id, item.id)
                             }
 
                             if (response.isSuccessful) {
-                                isFavorited = !isFavorited // Aggiorna lo stato dei preferiti
-                            } else {
+                                isFavorited = !isFavorited                             } else {
                             }
                         }
                     }
@@ -680,8 +677,8 @@ fun PurchasePage(itemId: Long, itemViewModel: ItemViewModel = viewModel(),userVi
 fun PurchaseContent(item: Item, wallet: Wallet, apiService: ApiService,sessionManager: SessionManager,navController: NavController,userViewModel: UserViewModel) {
     val token = sessionManager.getToken()
     val userState by userViewModel.user.collectAsState()
-    val prezzoProdotto = item.prezzo // Prezzo del prodotto
-    val costoSpedizione = 2.99 // Costo di spedizione fisso
+    val prezzoProdotto = item.prezzo
+    val costoSpedizione = 2.99
     val prezzoTotale = prezzoProdotto?.plus(costoSpedizione) ?: 0.0
     val prezzoFormattato = String.format("%.2f", prezzoTotale)
     val coroutineScope = rememberCoroutineScope()

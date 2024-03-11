@@ -207,8 +207,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
                                 }
                             }
                         } else {
-                            // Gestione dell'errore se la password e la conferma della password non corrispondono
-                            showDialog.value = false
+                                                        showDialog.value = false
                             errorMessage.value =
                                 "Errore. La password e la conferma della password non corrispondono."
 
@@ -257,8 +256,7 @@ fun RegisterPage(addressFormViewModel: AddressFormViewModel, userFormViewModel: 
                     Button(
                         onClick = {
                             navHostController.navigate(Routes.LOGIN.route)
-                            showDialog.value = false // Chiudi il popup
-                        }
+                            showDialog.value = false                         }
                     ) {
                         Text(text = "OK")
                     }
@@ -327,8 +325,7 @@ fun LoginPage(navController: NavController, apiService: ApiService, sessionManag
 
 
                     } catch (e: Exception) {
-                        // Si è verificato un errore durante la chiamata API
-                    }
+                                            }
             }
             }
         ) {

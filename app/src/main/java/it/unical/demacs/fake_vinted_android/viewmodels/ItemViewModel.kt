@@ -40,7 +40,7 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
             _isLoading.value = true
             _error.value = null
             try {
-                val token = sessionManager.getToken() // Assicurati che il token sia passato correttamente
+                val token = sessionManager.getToken()
                 val response = apiService.getItem("Bearer $token", itemId!!)
                 if (response.isSuccessful) {
                     _currentItem.value = response.body()
@@ -58,7 +58,7 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
     }
 
     init {
-        sessionManager = SessionManager(localContext) // Create an instance of your SessionManager class
+        sessionManager = SessionManager(localContext)
         apiService = RetrofitClient.create( sessionManager,localContext)
     }
 
@@ -96,16 +96,10 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
                 if (response.isSuccessful) {
                     _itemsInVendita.value = response.body() ?: emptyList()
                 } else {
-                    // Gestisci il caso in cui la richiesta non è stata eseguita correttamente
-                    // Ad esempio, logga un messaggio di errore o gestisci l'errore di conseguenza
                 }
             } catch (e: Exception) {
-                // Gestisci eventuali eccezioni durante la richiesta
-                // Ad esempio, logga un messaggio di errore o gestisci l'errore di conseguenza
             }
         } else {
-            // Gestisci il caso in cui il token è nullo
-            // Ad esempio, logga un messaggio di errore o gestisci l'errore di conseguenza
         }
     }
 
@@ -123,7 +117,7 @@ class ItemViewModel(private val localContext: Context) : ViewModel() {
 
 
 fun getItemById(itemId: String): Item? {
-        val itemIdLong = itemId.toLongOrNull() // Converte la stringa in Long?, restituisce null se la conversione fallisce
+        val itemIdLong = itemId.toLongOrNull()
         return itemsInVendita.value.find { it.id == itemIdLong }
     }
 
@@ -137,16 +131,12 @@ fun getItemById(itemId: String): Item? {
                     if (userId != null) {
                         val response = apiService.getFavorites("Bearer $token", userId)
                         if (response.isSuccessful) {
-                            // Aggiorna il LiveData con l'elenco dei preferiti
                             _favorites.value = response.body()?.toSet() ?: emptySet()
                         } else {
-                            // Gestisci l'errore
                         }
                     } else {
-                        // L'ID utente è null, gestisci questo caso
                     }
                 } else {
-                    // La chiamata per ottenere l'utente corrente non è andata a buon fine, gestisci questo caso
                 }
             }
         }

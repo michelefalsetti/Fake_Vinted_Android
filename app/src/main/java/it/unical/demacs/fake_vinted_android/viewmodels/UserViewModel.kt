@@ -37,7 +37,7 @@ class UserViewModel(private val localContext: Context): ViewModel() {
     val error: StateFlow<String?> = _error.asStateFlow()
 
     init {
-        sessionManager = SessionManager(localContext) // Create an instance of your SessionManager class
+        sessionManager = SessionManager(localContext)
         apiService = RetrofitClient.create(sessionManager,localContext)
     }
 
@@ -46,14 +46,13 @@ class UserViewModel(private val localContext: Context): ViewModel() {
             _isLoading.value = true
             _error.value = null
             try {
-                val token = sessionManager.getToken() // Assicurati che il token sia passato correttamente
+                val token = sessionManager.getToken()
                 val response = apiService.getCurrentUser("Bearer $token", token)
                 if (response.isSuccessful) {
-                    // Aggiorna lo stato dell'utente con i dati ricevuti
                     _user.value = response.body()
                     Log.d("eccolo", _user.value.toString())
                 } else {
-                    // Gestisci l'errore, ad esempio aggiornando lo stato dell'utente con un messaggio di errore
+
                     val errorBody = response.errorBody()?.string()
                     _error.value = "Errore durante il recupero dell'utente: Codice: ${response.code()}, Messaggio: $errorBody"
                 }
@@ -70,13 +69,11 @@ class UserViewModel(private val localContext: Context): ViewModel() {
             _isLoading.value = true
             _error.value = null
             try {
-                val token = sessionManager.getToken() // Assicurati che il token sia passato correttamente
+                val token = sessionManager.getToken()
                 val response = apiService.getSaldo("Bearer $token", token)
                 if (response.isSuccessful) {
-                    // Aggiorna lo stato dell'utente con i dati ricevuti
                     _saldo.value = response.body()
                 } else {
-                    // Gestisci l'errore, ad esempio aggiornando lo stato dell'utente con un messaggio di errore
                     val errorBody = response.errorBody()?.string()
                     _error.value = "Errore durante il recupero dell'utente: Codice: ${response.code()}, Messaggio: $errorBody"
                 }
