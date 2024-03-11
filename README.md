@@ -8,8 +8,6 @@ Per runnare il progetto:
 Se si vuole accedere con un account gia esistente le credenziali sono:
 username: lucarossi
 password: Amantea01
-
 oppure
-
 username: enzomolino
 password: Longobardi01
